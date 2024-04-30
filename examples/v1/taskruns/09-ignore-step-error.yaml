@@ -1,0 +1,117 @@
+kind: TaskRun
+apiVersion: tekton.dev/v1
+metadata:
+  generateName: taskrun-with-failing-step-
+spec:
+  taskSpec:
+    steps:
+      # exit with 1 and ignore non zero exit code
+      - image: alpine
+        onError: continue
+        name: exit-with-1
+        script: |
+          exit 1
+      # check if the /tekton/steps/step-<step-name>/exitCode got created and contains the exit code
+      # check if the symlink /tekton/steps/0/ got created
+      - image: alpine
+        name: verify-step-path
+        script: |
+          set -x
+          apk add tree
+          tree -a /tekton
+          tree -a /workspace
+          exitCode=`cat $(steps.step-exit-with-1.exitCode.path)`
+          if [ $exitCode == 1 ]; then
+              echo "Yay! the exit code can be accessed using the path variable and matches the previous step exit code"
+          else
+              echo "the exit code does not match."
+              exit 1
+          fi
+          FILE=/tekton/steps/step-exit-with-1/exitCode
+          if [ -f "$FILE" ]; then
+            echo "$FILE exists."
+            echo "Yay! the file exists which was created by the controller to record the step exit code."
+          else
+            echo "$FILE does not exist."
+            exit 1
+          fi
+          FILE=/tekton/steps/0/exitCode
+          if [ -f "$FILE" ]; then
+            echo "$FILE exists."
+            echo "Yay! the symlink exists which was created by the controller to record the step exit code."
+          else
+            echo "$FILE does not exist."
+            exit 1
+          fi
+          exitCode=`cat $FILE`
+          if [ $exitCode == 1 ]; then
+              echo "Yay! the exit code matches to the previous step exit code"
+          else
+              echo "the exit code does not match."
+              exit 1
+          fi
+---
+# $ kubectl logs taskrun-with-failing-step-xzq8k-pod -c step-verify-step-path
+
+# + apk add tree
+# fetch https://dl-cdn.alpinelinux.org/alpine/v3.19/main/x86_64/APKINDEX.tar.gz
+# fetch https://dl-cdn.alpinelinux.org/alpine/v3.19/community/x86_64/APKINDEX.tar.gz
+# (1/1) Installing tree (2.1.1-r0)
+# Executing busybox-1.36.1-r15.trigger
+# OK: 7 MiB in 16 packages
+
+# + tree -a /tekton
+# /tekton
+# ├── bin
+# │   └── entrypoint
+# ├── creds
+# ├── home
+# ├── results
+# ├── run
+# │   ├── 0
+# │   │   ├── out
+# │   │   └── status
+# │   │       ├── exitCode
+# │   │       └── results
+# │   └── 1
+# │       └── status
+# │           └── results
+# ├── scripts
+# │   ├── script-0-f9p8c
+# │   └── script-1-c9lld
+# ├── steps
+# │   ├── 0 -> /tekton/run/0/status
+# │   ├── 1 -> /tekton/run/1/status
+# │   ├── step-exit-with-1 -> /tekton/run/0/status
+# │   └── step-verify-step-path -> /tekton/run/1/status
+# └── termination
+
+# 18 directories, 6 files
+
+# + tree -a /workspace
+# /workspace
+
+# 0 directories, 0 files
+
+# + cat /tekton/steps/step-exit-with-1/exitCode
+# + exitCode=1
+# + '[' 1 '==' 1 ]
+# + echo 'Yay! the exit code can be accessed using the path variable and matches the previous step exit code'
+# + FILE=/tekton/steps/step-exit-with-1/exitCode
+# + '[' -f /tekton/steps/step-exit-with-1/exitCode ]
+# + echo '/tekton/steps/step-exit-with-1/exitCode exists.'
+# + echo 'Yay! the file exists which was created by the controller to record the step exit code.'
+# + FILE=/tekton/steps/0/exitCode
+# + '[' -f /tekton/steps/0/exitCode ]
+# + echo '/tekton/steps/0/exitCode exists.'
+# + echo 'Yay! the symlink exists which was created by the controller to record the step exit code.'
+# Yay! the exit code can be accessed using the path variable and matches the previous step exit code
+# /tekton/steps/step-exit-with-1/exitCode exists.
+# Yay! the file exists which was created by the controller to record the step exit code.
+# /tekton/steps/0/exitCode exists.
+# Yay! the symlink exists which was created by the controller to record the step exit code.
+# + cat /tekton/steps/0/exitCode
+# + exitCode=1
+# + '[' 1 '==' 1 ]
+# + echo 'Yay! the exit code matches to the previous step exit code'
+# Yay! the exit code matches to the previous step exit code

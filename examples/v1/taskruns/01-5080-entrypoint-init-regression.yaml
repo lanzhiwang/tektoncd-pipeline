@@ -1,0 +1,249 @@
+apiVersion: tekton.dev/v1
+kind: TaskRun
+metadata:
+  generateName: tkn-arg-test-
+spec:
+  params:
+    - name: ARGS
+      value:
+        - init
+        - foo
+        - bar
+  taskSpec:
+    description: >-
+      Test consuming args, acts as a regression test for bug 5080
+    params:
+      - name: ARGS
+        description: The terraform cli commands to run
+        type: array
+        default:
+          - "--help"
+    steps:
+      - name: echo-cli
+        image: cgr.dev/chainguard/busybox
+        workingDir: /tekton/home
+        args:
+          - "$(params.ARGS)"
+        command: ["echo"]
+# ---
+# $ kubectl logs  tkn-arg-test-8qqs7-pod
+# Defaulted container "step-echo-cli" out of: step-echo-cli, prepare (init)
+# init foo bar
+
+# ---
+# apiVersion: v1
+# kind: Pod
+# metadata:
+#   annotations:
+#     pipeline.tekton.dev/release: d714545
+#     tekton.dev/ready: READY
+#   creationTimestamp: "2024-04-30T02:20:57Z"
+#   labels:
+#     app.kubernetes.io/managed-by: tekton-pipelines
+#     tekton.dev/taskRun: tkn-arg-test-8qqs7
+#   name: tkn-arg-test-8qqs7-pod
+#   namespace: default
+#   ownerReferences:
+#     - apiVersion: tekton.dev/v1
+#       blockOwnerDeletion: true
+#       controller: true
+#       kind: TaskRun
+#       name: tkn-arg-test-8qqs7
+#       uid: 1b64b952-53af-4f26-b87c-d8951748ceed
+#   resourceVersion: "411607"
+#   uid: a9d49e65-501c-4529-ac30-7e959bf75aec
+# spec:
+#   activeDeadlineSeconds: 5400
+#   containers:
+#     - args:
+#         - -wait_file
+#         - /tekton/downward/ready
+#         - -wait_file_content
+#         - -post_file
+#         - /tekton/run/0/out
+#         - -termination_path
+#         - /tekton/termination
+#         - -step_metadata_dir
+#         - /tekton/run/0/status
+#         - -entrypoint
+#         - echo
+#         - --
+#         - init
+#         - foo
+#         - bar
+#       command:
+#         - /tekton/bin/entrypoint
+#       image: cgr.dev/chainguard/busybox
+#       imagePullPolicy: Always
+#       name: step-echo-cli
+#       resources: {}
+#       terminationMessagePath: /tekton/termination
+#       terminationMessagePolicy: File
+#       volumeMounts:
+#         - mountPath: /tekton/downward
+#           name: tekton-internal-downward
+#           readOnly: true
+#         - mountPath: /tekton/creds
+#           name: tekton-creds-init-home-0
+#         - mountPath: /tekton/run/0
+#           name: tekton-internal-run-0
+#         - mountPath: /tekton/bin
+#           name: tekton-internal-bin
+#           readOnly: true
+#         - mountPath: /workspace
+#           name: tekton-internal-workspace
+#         - mountPath: /tekton/home
+#           name: tekton-internal-home
+#         - mountPath: /tekton/results
+#           name: tekton-internal-results
+#         - mountPath: /tekton/steps
+#           name: tekton-internal-steps
+#           readOnly: true
+#         - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+#           name: kube-api-access-v7ktp
+#           readOnly: true
+#       workingDir: /tekton/home
+#   dnsPolicy: ClusterFirst
+#   enableServiceLinks: true
+#   initContainers:
+#     - command:
+#         - /ko-app/entrypoint
+#         - init
+#         - /ko-app/entrypoint
+#         - /tekton/bin/entrypoint
+#         - step-echo-cli
+#       image: ghcr.io/lanzhiwang/tekton-releases/tektoncd/pipeline/cmd/entrypoint:v0.57.0
+#       imagePullPolicy: IfNotPresent
+#       name: prepare
+#       resources: {}
+#       terminationMessagePath: /dev/termination-log
+#       terminationMessagePolicy: File
+#       volumeMounts:
+#         - mountPath: /tekton/bin
+#           name: tekton-internal-bin
+#         - mountPath: /tekton/steps
+#           name: tekton-internal-steps
+#         - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+#           name: kube-api-access-v7ktp
+#           readOnly: true
+#       workingDir: /
+#   nodeName: 192.168.137.27
+#   preemptionPolicy: PreemptLowerPriority
+#   priority: 0
+#   restartPolicy: Never
+#   schedulerName: default-scheduler
+#   securityContext: {}
+#   serviceAccount: default
+#   serviceAccountName: default
+#   terminationGracePeriodSeconds: 30
+#   tolerations:
+#     - effect: NoExecute
+#       key: node.kubernetes.io/not-ready
+#       operator: Exists
+#       tolerationSeconds: 30
+#     - effect: NoExecute
+#       key: node.kubernetes.io/unreachable
+#       operator: Exists
+#       tolerationSeconds: 30
+#   volumes:
+#     - emptyDir: {}
+#       name: tekton-internal-workspace
+#     - emptyDir: {}
+#       name: tekton-internal-home
+#     - emptyDir: {}
+#       name: tekton-internal-results
+#     - emptyDir: {}
+#       name: tekton-internal-steps
+#     - emptyDir: {}
+#       name: tekton-internal-bin
+#     - downwardAPI:
+#         defaultMode: 420
+#         items:
+#           - fieldRef:
+#               apiVersion: v1
+#               fieldPath: metadata.annotations['tekton.dev/ready']
+#             path: ready
+#       name: tekton-internal-downward
+#     - emptyDir:
+#         medium: Memory
+#       name: tekton-creds-init-home-0
+#     - emptyDir: {}
+#       name: tekton-internal-run-0
+#     - name: kube-api-access-v7ktp
+#       projected:
+#         defaultMode: 420
+#         sources:
+#           - serviceAccountToken:
+#               expirationSeconds: 3607
+#               path: token
+#           - configMap:
+#               items:
+#                 - key: ca.crt
+#                   path: ca.crt
+#               name: kube-root-ca.crt
+#           - downwardAPI:
+#               items:
+#                 - fieldRef:
+#                     apiVersion: v1
+#                     fieldPath: metadata.namespace
+#                   path: namespace
+# status:
+#   conditions:
+#     - lastProbeTime: null
+#       lastTransitionTime: "2024-04-30T02:20:59Z"
+#       reason: PodCompleted
+#       status: "True"
+#       type: Initialized
+#     - lastProbeTime: null
+#       lastTransitionTime: "2024-04-30T02:21:13Z"
+#       reason: PodCompleted
+#       status: "False"
+#       type: Ready
+#     - lastProbeTime: null
+#       lastTransitionTime: "2024-04-30T02:21:13Z"
+#       reason: PodCompleted
+#       status: "False"
+#       type: ContainersReady
+#     - lastProbeTime: null
+#       lastTransitionTime: "2024-04-30T02:20:57Z"
+#       status: "True"
+#       type: PodScheduled
+#   containerStatuses:
+#     - containerID: containerd://31b1168959efed22941adfa07f224b5bf494f8cb99d07b3bfc6ad4248823222f
+#       image: cgr.dev/chainguard/busybox:latest
+#       imageID: cgr.dev/chainguard/busybox@sha256:1726ea5cba91da374fe40cd4f07e3c984fa4bac1faab91061e69c62b46b7dd9e
+#       lastState: {}
+#       name: step-echo-cli
+#       ready: false
+#       restartCount: 0
+#       started: false
+#       state:
+#         terminated:
+#           containerID: containerd://31b1168959efed22941adfa07f224b5bf494f8cb99d07b3bfc6ad4248823222f
+#           exitCode: 0
+#           finishedAt: "2024-04-30T02:21:12Z"
+#           message: '[{"key":"StartedAt","value":"2024-04-30T02:21:12.604Z","type":3}]'
+#           reason: Completed
+#           startedAt: "2024-04-30T02:21:10Z"
+#   hostIP: 192.168.137.27
+#   initContainerStatuses:
+#     - containerID: containerd://74e1f2239fd0fc1bceb0d7375910feeadeb213734a056d832cebf2372514c3ac
+#       image: ghcr.io/lanzhiwang/tekton-releases/tektoncd/pipeline/cmd/entrypoint:v0.57.0
+#       imageID: ghcr.io/lanzhiwang/tekton-releases/tektoncd/pipeline/cmd/entrypoint@sha256:2aedd9b42d8ba49bf88de4bb6e789088ce3f6ac34cd8303dad18c2608e8f4008
+#       lastState: {}
+#       name: prepare
+#       ready: true
+#       restartCount: 0
+#       state:
+#         terminated:
+#           containerID: containerd://74e1f2239fd0fc1bceb0d7375910feeadeb213734a056d832cebf2372514c3ac
+#           exitCode: 0
+#           finishedAt: "2024-04-30T02:20:58Z"
+#           reason: Completed
+#           startedAt: "2024-04-30T02:20:58Z"
+#   phase: Succeeded
+#   podIP: 10.3.0.104
+#   podIPs:
+#     - ip: 10.3.0.104
+#   qosClass: BestEffort
+#   startTime: "2024-04-30T02:20:57Z"

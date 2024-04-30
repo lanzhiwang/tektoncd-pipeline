@@ -1,0 +1,412 @@
+apiVersion: tekton.dev/v1
+kind: TaskRun
+metadata:
+  generateName: object-param-result-
+spec:
+  params:
+    - name: gitrepo
+      value:
+        commit: "sha123"
+  taskSpec:
+    params:
+      - name: gitrepo
+        type: object
+        properties:
+          url: { type: string }
+          commit: { type: string }
+        default:
+          url: "github.example.com"
+    results:
+      - name: object-results
+        type: object
+        properties:
+          IMAGE_URL: { type: string }
+          IMAGE_DIGEST: { type: string }
+    steps:
+      - name: validate-object-params
+        image: bash
+        args: ["$(params.gitrepo.url)", "$(params.gitrepo.commit)"]
+        # /tekton/bin/entrypoint \
+        # -wait_file /tekton/downward/ready -wait_file_content \
+        # -post_file /tekton/run/0/out \
+        # -termination_path /tekton/termination \
+        # -step_metadata_dir /tekton/run/0/status \
+        # -results object-results \
+        # -entrypoint /tekton/scripts/script-0-7jdpz -- github.example.com sha123
+        script: |
+          set -x
+          if [[ $1 != "github.example.com" ]]; then
+              echo "Want: github.example.com, Got: $1"
+            exit 1
+          else
+            echo "validate the params.gitrepo.url successfully"
+          fi
+          if [[ $2 != "sha123" ]]; then
+              echo "Want: sha123, Got: $2"
+            exit 1
+          else
+            echo "validate the params.gitrepo.commit successfully"
+          fi
+      - name: write-object-result
+        image: alpine
+        # /tekton/bin/entrypoint \
+        # -wait_file /tekton/run/0/out \
+        # -post_file /tekton/run/1/out \
+        # -termination_path /tekton/termination \
+        # step_metadata_dir /tekton/run/1/status \
+        # -results object-results \
+        # -entrypoint /tekton/scripts/script-1-4wvjl --
+        script: |
+          set -x
+          apk add tree
+          tree -a /tekton
+          tree -a /workspace
+          echo -n "{\"IMAGE_URL\":\"ar.com\", \"IMAGE_DIGEST\":\"sha234\"}" > $(results.object-results.path)
+          cat $(results.object-results.path)
+          tree -a /tekton
+          tree -a /workspace
+          ls -al $(results.object-results.path)
+
+# ---
+# $ kubectl logs object-param-result-6nm8d-pod -c step-validate-object-params
+# + '[[' github.example.com '!=' github.example.com ]]
+# + echo 'validate the params.gitrepo.url successfully'
+# validate the params.gitrepo.url successfully
+# + '[[' sha123 '!=' sha123 ]]
+# + echo 'validate the params.gitrepo.commit successfully'
+# validate the params.gitrepo.commit successfully
+
+# $ kubectl logs -f object-param-result-6pwpw-pod -c step-write-object-result
+
+# + apk add tree
+# fetch https://dl-cdn.alpinelinux.org/alpine/v3.19/main/x86_64/APKINDEX.tar.gz
+# fetch https://dl-cdn.alpinelinux.org/alpine/v3.19/community/x86_64/APKINDEX.tar.gz
+# (1/1) Installing tree (2.1.1-r0)
+# Executing busybox-1.36.1-r15.trigger
+# OK: 7 MiB in 16 packages
+
+# + tree -a /tekton
+# /tekton
+# ├── bin
+# │   └── entrypoint
+# ├── creds
+# ├── home
+# ├── results
+# ├── run
+# │   ├── 0
+# │   │   ├── out
+# │   │   └── status
+# │   │       ├── exitCode
+# │   │       └── results
+# │   └── 1
+# │       └── status
+# │           └── results
+# ├── scripts
+# │   ├── script-0-jjpkq
+# │   └── script-1-hmqmd
+# ├── steps
+# │   ├── 0 -> /tekton/run/0/status
+# │   ├── 1 -> /tekton/run/1/status
+# │   ├── step-validate-object-params -> /tekton/run/0/status
+# │   └── step-write-object-result -> /tekton/run/1/status
+# └── termination
+
+# 18 directories, 6 files
+
+# + tree -a /workspace
+# /workspace
+
+# 0 directories, 0 files
+
+# + echo -n '{"IMAGE_URL":"ar.com", "IMAGE_DIGEST":"sha234"}'
+
+# + cat /tekton/results/object-results
+# {"IMAGE_URL":"ar.com", "IMAGE_DIGEST":"sha234"}
+
+# + tree -a /tekton
+# /tekton
+# ├── bin
+# │   └── entrypoint
+# ├── creds
+# ├── home
+# ├── results
+# │   └── object-results
+# ├── run
+# │   ├── 0
+# │   │   ├── out
+# │   │   └── status
+# │   │       ├── exitCode
+# │   │       └── results
+# │   └── 1
+# │       └── status
+# │           └── results
+# ├── scripts
+# │   ├── script-0-jjpkq
+# │   └── script-1-hmqmd
+# ├── steps
+# │   ├── 0 -> /tekton/run/0/status
+# │   ├── 1 -> /tekton/run/1/status
+# │   ├── step-validate-object-params -> /tekton/run/0/status
+# │   └── step-write-object-result -> /tekton/run/1/status
+# └── termination
+
+# 18 directories, 7 files
+
+# + tree -a /workspace
+# /workspace
+
+# 0 directories, 0 files
+
+# + ls -al /tekton/results/object-results
+# -rw-r--r--    1 root     root            47 Apr 30 09:20 /tekton/results/object-results
+
+# ---
+# apiVersion: v1
+# kind: Pod
+# metadata:
+#   annotations:
+#     pipeline.tekton.dev/release: d714545
+#     tekton.dev/ready: READY
+#   creationTimestamp: "2024-04-30T09:19:59Z"
+#   labels:
+#     app.kubernetes.io/managed-by: tekton-pipelines
+#     tekton.dev/taskRun: object-param-result-6pwpw
+#   name: object-param-result-6pwpw-pod
+#   namespace: default
+#   ownerReferences:
+#     - apiVersion: tekton.dev/v1
+#       blockOwnerDeletion: true
+#       controller: true
+#       kind: TaskRun
+#       name: object-param-result-6pwpw
+#       uid: fb84711e-647c-4055-9116-09cf881f5622
+#   resourceVersion: "608258"
+#   uid: b89bf0c1-de88-4ba8-aca7-4ed7d8e5ce64
+# spec:
+#   activeDeadlineSeconds: 5400
+#   containers:
+#     - args:
+#         - -wait_file
+#         - /tekton/downward/ready
+#         - -wait_file_content
+#         - -post_file
+#         - /tekton/run/0/out
+#         - -termination_path
+#         - /tekton/termination
+#         - -step_metadata_dir
+#         - /tekton/run/0/status
+#         - -results
+#         - object-results
+#         - -entrypoint
+#         - /tekton/scripts/script-0-jjpkq
+#         - --
+#         - github.example.com
+#         - sha123
+#       command:
+#         - /tekton/bin/entrypoint
+#       image: bash
+#       imagePullPolicy: Always
+#       name: step-validate-object-params
+#       resources: {}
+#       terminationMessagePath: /tekton/termination
+#       terminationMessagePolicy: File
+#       volumeMounts:
+#         - mountPath: /tekton/scripts
+#           name: tekton-internal-scripts
+#           readOnly: true
+#         - mountPath: /tekton/downward
+#           name: tekton-internal-downward
+#           readOnly: true
+#         - mountPath: /tekton/creds
+#           name: tekton-creds-init-home-0
+#         - mountPath: /tekton/run/0
+#           name: tekton-internal-run-0
+#         - mountPath: /tekton/run/1
+#           name: tekton-internal-run-1
+#           readOnly: true
+#         - mountPath: /tekton/bin
+#           name: tekton-internal-bin
+#           readOnly: true
+#         - mountPath: /workspace
+#           name: tekton-internal-workspace
+#         - mountPath: /tekton/home
+#           name: tekton-internal-home
+#         - mountPath: /tekton/results
+#           name: tekton-internal-results
+#         - mountPath: /tekton/steps
+#           name: tekton-internal-steps
+#           readOnly: true
+#         - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+#           name: kube-api-access-6kk7w
+#           readOnly: true
+#     - args:
+#         - -wait_file
+#         - /tekton/run/0/out
+#         - -post_file
+#         - /tekton/run/1/out
+#         - -termination_path
+#         - /tekton/termination
+#         - -step_metadata_dir
+#         - /tekton/run/1/status
+#         - -results
+#         - object-results
+#         - -entrypoint
+#         - /tekton/scripts/script-1-hmqmd
+#         - --
+#       command:
+#         - /tekton/bin/entrypoint
+#       image: alpine
+#       imagePullPolicy: Always
+#       name: step-write-object-result
+#       resources: {}
+#       terminationMessagePath: /tekton/termination
+#       terminationMessagePolicy: File
+#       volumeMounts:
+#         - mountPath: /tekton/scripts
+#           name: tekton-internal-scripts
+#           readOnly: true
+#         - mountPath: /tekton/creds
+#           name: tekton-creds-init-home-1
+#         - mountPath: /tekton/run/0
+#           name: tekton-internal-run-0
+#           readOnly: true
+#         - mountPath: /tekton/run/1
+#           name: tekton-internal-run-1
+#         - mountPath: /tekton/bin
+#           name: tekton-internal-bin
+#           readOnly: true
+#         - mountPath: /workspace
+#           name: tekton-internal-workspace
+#         - mountPath: /tekton/home
+#           name: tekton-internal-home
+#         - mountPath: /tekton/results
+#           name: tekton-internal-results
+#         - mountPath: /tekton/steps
+#           name: tekton-internal-steps
+#           readOnly: true
+#         - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+#           name: kube-api-access-6kk7w
+#           readOnly: true
+#   dnsPolicy: ClusterFirst
+#   enableServiceLinks: true
+#   initContainers:
+#     - command:
+#         - /ko-app/entrypoint
+#         - init
+#         - /ko-app/entrypoint
+#         - /tekton/bin/entrypoint
+#         - step-validate-object-params
+#         - step-write-object-result
+#       image: ghcr.io/lanzhiwang/tekton-releases/tektoncd/pipeline/cmd/entrypoint:v0.57.0
+#       imagePullPolicy: IfNotPresent
+#       name: prepare
+#       resources: {}
+#       terminationMessagePath: /dev/termination-log
+#       terminationMessagePolicy: File
+#       volumeMounts:
+#         - mountPath: /tekton/bin
+#           name: tekton-internal-bin
+#         - mountPath: /tekton/steps
+#           name: tekton-internal-steps
+#         - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+#           name: kube-api-access-6kk7w
+#           readOnly: true
+#       workingDir: /
+#     - args:
+#         - -c
+#         - |
+#           scriptfile="/tekton/scripts/script-0-jjpkq"
+#           touch ${scriptfile} && chmod +x ${scriptfile}
+#           cat > ${scriptfile} << '_EOF_'
+#           IyEvYmluL3NoCnNldCAtZQpzZXQgLXgKaWYgW1sgJDEgIT0gImdpdGh1Yi5leGFtcGxlLmNvbSIgXV07IHRoZW4KICAgIGVjaG8gIldhbnQ6IGdpdGh1Yi5leGFtcGxlLmNvbSwgR290OiAkMSIKICBleGl0IDEKZWxzZQogIGVjaG8gInZhbGlkYXRlIHRoZSBwYXJhbXMuZ2l0cmVwby51cmwgc3VjY2Vzc2Z1bGx5IgpmaQppZiBbWyAkMiAhPSAic2hhMTIzIiBdXTsgdGhlbgogICAgZWNobyAiV2FudDogc2hhMTIzLCBHb3Q6ICQyIgogIGV4aXQgMQplbHNlCiAgZWNobyAidmFsaWRhdGUgdGhlIHBhcmFtcy5naXRyZXBvLmNvbW1pdCBzdWNjZXNzZnVsbHkiCmZpCg==
+#           _EOF_
+#           /tekton/bin/entrypoint decode-script "${scriptfile}"
+#           scriptfile="/tekton/scripts/script-1-hmqmd"
+#           touch ${scriptfile} && chmod +x ${scriptfile}
+#           cat > ${scriptfile} << '_EOF_'
+#           IyEvYmluL3NoCnNldCAtZQpzZXQgLXgKYXBrIGFkZCB0cmVlCnRyZWUgLWEgL3Rla3Rvbgp0cmVlIC1hIC93b3Jrc3BhY2UKZWNobyAtbiAie1wiSU1BR0VfVVJMXCI6XCJhci5jb21cIiwgXCJJTUFHRV9ESUdFU1RcIjpcInNoYTIzNFwifSIgPiAvdGVrdG9uL3Jlc3VsdHMvb2JqZWN0LXJlc3VsdHMKY2F0IC90ZWt0b24vcmVzdWx0cy9vYmplY3QtcmVzdWx0cwp0cmVlIC1hIC90ZWt0b24KdHJlZSAtYSAvd29ya3NwYWNlCmxzIC1hbCAvdGVrdG9uL3Jlc3VsdHMvb2JqZWN0LXJlc3VsdHMKdHJlZSAtYSAvdGVrdG9uL3Jlc3VsdHMvb2JqZWN0LXJlc3VsdHMK
+#           _EOF_
+#           /tekton/bin/entrypoint decode-script "${scriptfile}"
+#       command:
+#         - sh
+#       image: ghcr.io/lanzhiwang/chainguard/busybox:v1.0.0
+#       imagePullPolicy: IfNotPresent
+#       name: place-scripts
+#       resources: {}
+#       terminationMessagePath: /dev/termination-log
+#       terminationMessagePolicy: File
+#       volumeMounts:
+#         - mountPath: /tekton/scripts
+#           name: tekton-internal-scripts
+#         - mountPath: /tekton/bin
+#           name: tekton-internal-bin
+#         - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+#           name: kube-api-access-6kk7w
+#           readOnly: true
+#   nodeName: 192.168.137.27
+#   preemptionPolicy: PreemptLowerPriority
+#   priority: 0
+#   restartPolicy: Never
+#   schedulerName: default-scheduler
+#   securityContext: {}
+#   serviceAccount: default
+#   serviceAccountName: default
+#   terminationGracePeriodSeconds: 30
+#   tolerations:
+#     - effect: NoExecute
+#       key: node.kubernetes.io/not-ready
+#       operator: Exists
+#       tolerationSeconds: 30
+#     - effect: NoExecute
+#       key: node.kubernetes.io/unreachable
+#       operator: Exists
+#       tolerationSeconds: 30
+#   volumes:
+#     - emptyDir: {}
+#       name: tekton-internal-workspace
+#     - emptyDir: {}
+#       name: tekton-internal-home
+#     - emptyDir: {}
+#       name: tekton-internal-results
+#     - emptyDir: {}
+#       name: tekton-internal-steps
+#     - emptyDir: {}
+#       name: tekton-internal-scripts
+#     - emptyDir: {}
+#       name: tekton-internal-bin
+#     - downwardAPI:
+#         defaultMode: 420
+#         items:
+#           - fieldRef:
+#               apiVersion: v1
+#               fieldPath: metadata.annotations['tekton.dev/ready']
+#             path: ready
+#       name: tekton-internal-downward
+#     - emptyDir:
+#         medium: Memory
+#       name: tekton-creds-init-home-0
+#     - emptyDir: {}
+#       name: tekton-internal-run-0
+#     - emptyDir:
+#         medium: Memory
+#       name: tekton-creds-init-home-1
+#     - emptyDir: {}
+#       name: tekton-internal-run-1
+#     - name: kube-api-access-6kk7w
+#       projected:
+#         defaultMode: 420
+#         sources:
+#           - serviceAccountToken:
+#               expirationSeconds: 3607
+#               path: token
+#           - configMap:
+#               items:
+#                 - key: ca.crt
+#                   path: ca.crt
+#               name: kube-root-ca.crt
+#           - downwardAPI:
+#               items:
+#                 - fieldRef:
+#                     apiVersion: v1
+#                     fieldPath: metadata.namespace
+#                   path: namespace
