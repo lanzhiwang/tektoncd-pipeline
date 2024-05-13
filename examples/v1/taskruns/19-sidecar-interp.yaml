@@ -39,21 +39,18 @@ spec:
 #   annotations:
 #     pipeline.tekton.dev/release: d714545
 #     tekton.dev/ready: READY
-#   creationTimestamp: "2024-04-30T09:35:40Z"
 #   labels:
 #     app.kubernetes.io/managed-by: tekton-pipelines
-#     tekton.dev/taskRun: sidecar-interp-5frc9
-#   name: sidecar-interp-5frc9-pod
+#     tekton.dev/taskRun: sidecar-interp-zkjn8
+#   name: sidecar-interp-zkjn8-pod
 #   namespace: default
 #   ownerReferences:
 #     - apiVersion: tekton.dev/v1
 #       blockOwnerDeletion: true
 #       controller: true
 #       kind: TaskRun
-#       name: sidecar-interp-5frc9
-#       uid: ec5ea571-0e47-44ef-ac63-06bee6b1ed86
-#   resourceVersion: "615825"
-#   uid: 8dd80bf3-4042-42bc-8922-eb3122917ac8
+#       name: sidecar-interp-zkjn8
+#       uid: 06d3eb44-4f85-4035-81b1-2e6659645145
 # spec:
 #   activeDeadlineSeconds: 5400
 #   containers:
@@ -68,7 +65,7 @@ spec:
 #         - -step_metadata_dir
 #         - /tekton/run/0/status
 #         - -entrypoint
-#         - /tekton/scripts/script-0-29bnn
+#         - /tekton/scripts/script-0-nhnzx
 #         - --
 #       command:
 #         - /tekton/bin/entrypoint
@@ -104,7 +101,7 @@ spec:
 #           name: tekton-internal-steps
 #           readOnly: true
 #         - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
-#           name: kube-api-access-vjd5x
+#           name: kube-api-access-7dhmw
 #           readOnly: true
 #     - args:
 #         - -c
@@ -121,7 +118,7 @@ spec:
 #         - mountPath: /shared
 #           name: shared
 #         - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
-#           name: kube-api-access-vjd5x
+#           name: kube-api-access-7dhmw
 #           readOnly: true
 #   dnsPolicy: ClusterFirst
 #   enableServiceLinks: true
@@ -144,13 +141,13 @@ spec:
 #         - mountPath: /tekton/steps
 #           name: tekton-internal-steps
 #         - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
-#           name: kube-api-access-vjd5x
+#           name: kube-api-access-7dhmw
 #           readOnly: true
 #       workingDir: /
 #     - args:
 #         - -c
 #         - |
-#           scriptfile="/tekton/scripts/script-0-29bnn"
+#           scriptfile="/tekton/scripts/script-0-nhnzx"
 #           touch ${scriptfile} && chmod +x ${scriptfile}
 #           cat > ${scriptfile} << '_EOF_'
 #           IyEvYmluL2Jhc2gKc2V0IC14ClZBTFVFPSQoY2F0IC9zaGFyZWQvdmFsdWUpCltbICRWQUxVRSA9PSAnZm9vJyBdXQo=
@@ -170,9 +167,9 @@ spec:
 #         - mountPath: /tekton/bin
 #           name: tekton-internal-bin
 #         - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
-#           name: kube-api-access-vjd5x
+#           name: kube-api-access-7dhmw
 #           readOnly: true
-#   nodeName: 192.168.137.27
+#   nodeName: 192.168.143.6
 #   preemptionPolicy: PreemptLowerPriority
 #   priority: 0
 #   restartPolicy: Never
@@ -218,7 +215,7 @@ spec:
 #       name: tekton-internal-run-0
 #     - emptyDir: {}
 #       name: shared
-#     - name: kube-api-access-vjd5x
+#     - name: kube-api-access-7dhmw
 #       projected:
 #         defaultMode: 420
 #         sources:

@@ -23,3 +23,292 @@ spec:
             printf "Unexpected extra configuration mounted at %s\n" "$(workspaces.extra-config.path)"
             exit 1
           fi
+      - image: ubuntu
+        script: |
+          #!/usr/bin/env bash
+          set -x
+          pwd
+          env
+          if [ "$(workspaces.source-code.bound)" == "true" ]; then
+            printf "Source code workspace was provided at %s!\n" "$(workspaces.source-code.path)"
+          fi
+          if [ "$(workspaces.extra-config.bound)" == "true" ]; then
+            printf "Unexpected extra configuration mounted at %s\n" "$(workspaces.extra-config.path)"
+            exit 1
+          fi
+
+# ---
+# apiVersion: v1
+# kind: Pod
+# metadata:
+#   annotations:
+#     pipeline.tekton.dev/release: d714545
+#     tekton.dev/ready: READY
+#   labels:
+#     app.kubernetes.io/managed-by: tekton-pipelines
+#     tekton.dev/taskRun: optional-workspaces-rh42c
+#   name: optional-workspaces-rh42c-pod
+#   namespace: default
+#   ownerReferences:
+#     - apiVersion: tekton.dev/v1
+#       blockOwnerDeletion: true
+#       controller: true
+#       kind: TaskRun
+#       name: optional-workspaces-rh42c
+#       uid: 73919e0b-b170-4ccd-b1b2-4b5ad539a124
+# spec:
+#   activeDeadlineSeconds: 5400
+#   containers:
+#     - args:
+#         - -wait_file
+#         - /tekton/downward/ready
+#         - -wait_file_content
+#         - -post_file
+#         - /tekton/run/0/out
+#         - -termination_path
+#         - /tekton/termination
+#         - -step_metadata_dir
+#         - /tekton/run/0/status
+#         - -entrypoint
+#         - /tekton/scripts/script-0-fkgrf
+#         - --
+#       command:
+#         - /tekton/bin/entrypoint
+#       image: alpine:3.12.0
+#       imagePullPolicy: IfNotPresent
+#       name: step-check-workspaces
+#       resources: {}
+#       terminationMessagePath: /tekton/termination
+#       terminationMessagePolicy: File
+#       volumeMounts:
+#         - mountPath: /workspace/source-code
+#           name: ws-ctcq4
+#         - mountPath: /tekton/scripts
+#           name: tekton-internal-scripts
+#           readOnly: true
+#         - mountPath: /tekton/downward
+#           name: tekton-internal-downward
+#           readOnly: true
+#         - mountPath: /tekton/creds
+#           name: tekton-creds-init-home-0
+#         - mountPath: /tekton/run/0
+#           name: tekton-internal-run-0
+#         - mountPath: /tekton/run/1
+#           name: tekton-internal-run-1
+#           readOnly: true
+#         - mountPath: /tekton/bin
+#           name: tekton-internal-bin
+#           readOnly: true
+#         - mountPath: /workspace
+#           name: tekton-internal-workspace
+#         - mountPath: /tekton/home
+#           name: tekton-internal-home
+#         - mountPath: /tekton/results
+#           name: tekton-internal-results
+#         - mountPath: /tekton/steps
+#           name: tekton-internal-steps
+#           readOnly: true
+#         - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+#           name: kube-api-access-pb7wg
+#           readOnly: true
+#     - args:
+#         - -wait_file
+#         - /tekton/run/0/out
+#         - -post_file
+#         - /tekton/run/1/out
+#         - -termination_path
+#         - /tekton/termination
+#         - -step_metadata_dir
+#         - /tekton/run/1/status
+#         - -entrypoint
+#         - /tekton/scripts/script-1-8sbkp
+#         - --
+#       command:
+#         - /tekton/bin/entrypoint
+#       image: ubuntu
+#       imagePullPolicy: Always
+#       name: step-unnamed-1
+#       resources: {}
+#       terminationMessagePath: /tekton/termination
+#       terminationMessagePolicy: File
+#       volumeMounts:
+#         - mountPath: /workspace/source-code
+#           name: ws-ctcq4
+#         - mountPath: /tekton/scripts
+#           name: tekton-internal-scripts
+#           readOnly: true
+#         - mountPath: /tekton/creds
+#           name: tekton-creds-init-home-1
+#         - mountPath: /tekton/run/0
+#           name: tekton-internal-run-0
+#           readOnly: true
+#         - mountPath: /tekton/run/1
+#           name: tekton-internal-run-1
+#         - mountPath: /tekton/bin
+#           name: tekton-internal-bin
+#           readOnly: true
+#         - mountPath: /workspace
+#           name: tekton-internal-workspace
+#         - mountPath: /tekton/home
+#           name: tekton-internal-home
+#         - mountPath: /tekton/results
+#           name: tekton-internal-results
+#         - mountPath: /tekton/steps
+#           name: tekton-internal-steps
+#           readOnly: true
+#         - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+#           name: kube-api-access-pb7wg
+#           readOnly: true
+#   dnsPolicy: ClusterFirst
+#   enableServiceLinks: true
+#   initContainers:
+#     - command:
+#         - /ko-app/entrypoint
+#         - init
+#         - /ko-app/entrypoint
+#         - /tekton/bin/entrypoint
+#         - step-check-workspaces
+#         - step-unnamed-1
+#       image: ghcr.io/lanzhiwang/tekton-releases/tektoncd/pipeline/cmd/entrypoint:v0.57.0
+#       imagePullPolicy: IfNotPresent
+#       name: prepare
+#       resources: {}
+#       terminationMessagePath: /dev/termination-log
+#       terminationMessagePolicy: File
+#       volumeMounts:
+#         - mountPath: /tekton/bin
+#           name: tekton-internal-bin
+#         - mountPath: /tekton/steps
+#           name: tekton-internal-steps
+#         - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+#           name: kube-api-access-pb7wg
+#           readOnly: true
+#       workingDir: /
+#     - args:
+#         - -c
+#         - |
+#           scriptfile="/tekton/scripts/script-0-fkgrf"
+#           touch ${scriptfile} && chmod +x ${scriptfile}
+#           cat > ${scriptfile} << '_EOF_'
+#           IyEvYmluL3NoCnNldCAtZQppZiBbICJ0cnVlIiA9PSAidHJ1ZSIgXTsgdGhlbgogIHByaW50ZiAiU291cmNlIGNvZGUgd29ya3NwYWNlIHdhcyBwcm92aWRlZCBhdCAlcyFcbiIgIi93b3Jrc3BhY2Uvc291cmNlLWNvZGUiCmZpCmlmIFsgImZhbHNlIiA9PSAidHJ1ZSIgXTsgdGhlbgogIHByaW50ZiAiVW5leHBlY3RlZCBleHRyYSBjb25maWd1cmF0aW9uIG1vdW50ZWQgYXQgJXNcbiIgIiIKICBleGl0IDEKZmkK
+#           _EOF_
+#           /tekton/bin/entrypoint decode-script "${scriptfile}"
+#           scriptfile="/tekton/scripts/script-1-8sbkp"
+#           touch ${scriptfile} && chmod +x ${scriptfile}
+#           cat > ${scriptfile} << '_EOF_'
+#           IyEvdXNyL2Jpbi9lbnYgYmFzaApzZXQgLXgKcHdkCmVudgppZiBbICJ0cnVlIiA9PSAidHJ1ZSIgXTsgdGhlbgogIHByaW50ZiAiU291cmNlIGNvZGUgd29ya3NwYWNlIHdhcyBwcm92aWRlZCBhdCAlcyFcbiIgIi93b3Jrc3BhY2Uvc291cmNlLWNvZGUiCmZpCmlmIFsgImZhbHNlIiA9PSAidHJ1ZSIgXTsgdGhlbgogIHByaW50ZiAiVW5leHBlY3RlZCBleHRyYSBjb25maWd1cmF0aW9uIG1vdW50ZWQgYXQgJXNcbiIgIiIKICBleGl0IDEKZmkK
+#           _EOF_
+#           /tekton/bin/entrypoint decode-script "${scriptfile}"
+#       command:
+#         - sh
+#       image: ghcr.io/lanzhiwang/chainguard/busybox:v1.0.0
+#       imagePullPolicy: IfNotPresent
+#       name: place-scripts
+#       resources: {}
+#       terminationMessagePath: /dev/termination-log
+#       terminationMessagePolicy: File
+#       volumeMounts:
+#         - mountPath: /tekton/scripts
+#           name: tekton-internal-scripts
+#         - mountPath: /tekton/bin
+#           name: tekton-internal-bin
+#         - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+#           name: kube-api-access-pb7wg
+#           readOnly: true
+#   nodeName: 192.168.138.249
+#   preemptionPolicy: PreemptLowerPriority
+#   priority: 0
+#   restartPolicy: Never
+#   schedulerName: default-scheduler
+#   securityContext: {}
+#   serviceAccount: default
+#   serviceAccountName: default
+#   terminationGracePeriodSeconds: 30
+#   tolerations:
+#     - effect: NoExecute
+#       key: node.kubernetes.io/not-ready
+#       operator: Exists
+#       tolerationSeconds: 30
+#     - effect: NoExecute
+#       key: node.kubernetes.io/unreachable
+#       operator: Exists
+#       tolerationSeconds: 30
+#   volumes:
+#     - emptyDir: {}
+#       name: tekton-internal-workspace
+#     - emptyDir: {}
+#       name: tekton-internal-home
+#     - emptyDir: {}
+#       name: tekton-internal-results
+#     - emptyDir: {}
+#       name: tekton-internal-steps
+#     - emptyDir: {}
+#       name: tekton-internal-scripts
+#     - emptyDir: {}
+#       name: tekton-internal-bin
+#     - downwardAPI:
+#         defaultMode: 420
+#         items:
+#           - fieldRef:
+#               apiVersion: v1
+#               fieldPath: metadata.annotations['tekton.dev/ready']
+#             path: ready
+#       name: tekton-internal-downward
+#     - emptyDir:
+#         medium: Memory
+#       name: tekton-creds-init-home-0
+#     - emptyDir: {}
+#       name: tekton-internal-run-0
+#     - emptyDir:
+#         medium: Memory
+#       name: tekton-creds-init-home-1
+#     - emptyDir: {}
+#       name: tekton-internal-run-1
+#     - emptyDir: {}
+#       name: ws-ctcq4
+#     - name: kube-api-access-pb7wg
+#       projected:
+#         defaultMode: 420
+#         sources:
+#           - serviceAccountToken:
+#               expirationSeconds: 3607
+#               path: token
+#           - configMap:
+#               items:
+#                 - key: ca.crt
+#                   path: ca.crt
+#               name: kube-root-ca.crt
+#           - downwardAPI:
+#               items:
+#                 - fieldRef:
+#                     apiVersion: v1
+#                     fieldPath: metadata.namespace
+#                   path: namespace
+
+# $ kubectl logs optional-workspaces-rh42c-pod step-check-workspaces
+# Source code workspace was provided at /workspace/source-code!
+# $
+
+# $ kubectl logs optional-workspaces-rh42c-pod -c step-unnamed-1
+# + pwd
+# /
+# + env
+# KUBERNETES_SERVICE_PORT_HTTPS=443
+# KUBERNETES_SERVICE_PORT=443
+# HOSTNAME=optional-workspaces-rh42c-pod
+# PWD=/
+# HOME=/root
+# KUBERNETES_PORT_443_TCP=tcp://10.4.0.1:443
+# SHLVL=1
+# KUBERNETES_PORT_443_TCP_PROTO=tcp
+# KUBERNETES_PORT_443_TCP_ADDR=10.4.0.1
+# KUBERNETES_SERVICE_HOST=10.4.0.1
+# KUBERNETES_PORT=tcp://10.4.0.1:443
+# KUBERNETES_PORT_443_TCP_PORT=443
+# PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+# _=/usr/bin/env
+# + '[' true == true ']'
+# + printf 'Source code workspace was provided at %s!\n' /workspace/source-code
+# Source code workspace was provided at /workspace/source-code!
+# + '[' false == true ']'
+# $

@@ -33,7 +33,7 @@ spec:
     - name: STRING_CHAR
       description: Char to use when creating string
       type: string
-      default: '.'
+      default: "."
   results:
     - name: RESULT_STRING
       description: A result string
@@ -60,28 +60,28 @@ spec:
   description: >-
     Generate a result of a certain length in a task and print the result in another task
   params:
-  - name: RESULT_STRING_LENGTH
-    description: Length of string to generate for generate-result task
-  - name: RESULT_STRING_CHAR
-    description: Char to repeat in result string
-    default: '.'
+    - name: RESULT_STRING_LENGTH
+      description: Length of string to generate for generate-result task
+    - name: RESULT_STRING_CHAR
+      description: Char to repeat in result string
+      default: "."
   tasks:
-  - name: generate-result
-    params:
-    - name: STRING_LENGTH
-      value: $(params.RESULT_STRING_LENGTH)
-    - name: STRING_CHAR
-      value: $(params.RESULT_STRING_CHAR)
-    taskRef:
-      kind: Task
-      name: generate-result
-  - name: print-result
-    params:
-    - name: TO_PRINT
-      value: $(tasks.generate-result.results.RESULT_STRING)
-    taskRef:
-      kind: Task
-      name: print-result
+    - name: generate-result
+      params:
+        - name: STRING_LENGTH
+          value: $(params.RESULT_STRING_LENGTH)
+        - name: STRING_CHAR
+          value: $(params.RESULT_STRING_CHAR)
+      taskRef:
+        kind: Task
+        name: generate-result
+    - name: print-result
+      params:
+        - name: TO_PRINT
+          value: $(tasks.generate-result.results.RESULT_STRING)
+      taskRef:
+        kind: Task
+        name: print-result
 ---
 apiVersion: tekton.dev/v1
 kind: PipelineRun
@@ -91,5 +91,5 @@ spec:
   pipelineRef:
     name: result-test
   params:
-  - name: RESULT_STRING_LENGTH
-    value: "3000"
+    - name: RESULT_STRING_LENGTH
+      value: "3000"

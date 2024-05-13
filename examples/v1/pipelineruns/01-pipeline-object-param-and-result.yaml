@@ -42,10 +42,7 @@ spec:
   steps:
     - name: echo-params
       image: bash:latest
-      args: [
-        "$(params.arg.foo)",
-        "$(params.arg.bar)"
-      ]
+      args: ["$(params.arg.foo)", "$(params.arg.bar)"]
       script: |
         if [[ $1 != "abc.com" ]]; then
             echo "Want: abc.com, Got: $1"

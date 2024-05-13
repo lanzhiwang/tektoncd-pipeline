@@ -25,19 +25,14 @@ spec:
         args:
           - "$(params.ARGS)"
         command: ["echo"]
-# ---
-# $ kubectl logs  tkn-arg-test-8qqs7-pod
-# Defaulted container "step-echo-cli" out of: step-echo-cli, prepare (init)
-# init foo bar
 
-# ---
+---
 # apiVersion: v1
 # kind: Pod
 # metadata:
 #   annotations:
 #     pipeline.tekton.dev/release: d714545
 #     tekton.dev/ready: READY
-#   creationTimestamp: "2024-04-30T02:20:57Z"
 #   labels:
 #     app.kubernetes.io/managed-by: tekton-pipelines
 #     tekton.dev/taskRun: tkn-arg-test-8qqs7
@@ -50,8 +45,6 @@ spec:
 #       kind: TaskRun
 #       name: tkn-arg-test-8qqs7
 #       uid: 1b64b952-53af-4f26-b87c-d8951748ceed
-#   resourceVersion: "411607"
-#   uid: a9d49e65-501c-4529-ac30-7e959bf75aec
 # spec:
 #   activeDeadlineSeconds: 5400
 #   containers:
@@ -187,63 +180,9 @@ spec:
 #                     apiVersion: v1
 #                     fieldPath: metadata.namespace
 #                   path: namespace
-# status:
-#   conditions:
-#     - lastProbeTime: null
-#       lastTransitionTime: "2024-04-30T02:20:59Z"
-#       reason: PodCompleted
-#       status: "True"
-#       type: Initialized
-#     - lastProbeTime: null
-#       lastTransitionTime: "2024-04-30T02:21:13Z"
-#       reason: PodCompleted
-#       status: "False"
-#       type: Ready
-#     - lastProbeTime: null
-#       lastTransitionTime: "2024-04-30T02:21:13Z"
-#       reason: PodCompleted
-#       status: "False"
-#       type: ContainersReady
-#     - lastProbeTime: null
-#       lastTransitionTime: "2024-04-30T02:20:57Z"
-#       status: "True"
-#       type: PodScheduled
-#   containerStatuses:
-#     - containerID: containerd://31b1168959efed22941adfa07f224b5bf494f8cb99d07b3bfc6ad4248823222f
-#       image: cgr.dev/chainguard/busybox:latest
-#       imageID: cgr.dev/chainguard/busybox@sha256:1726ea5cba91da374fe40cd4f07e3c984fa4bac1faab91061e69c62b46b7dd9e
-#       lastState: {}
-#       name: step-echo-cli
-#       ready: false
-#       restartCount: 0
-#       started: false
-#       state:
-#         terminated:
-#           containerID: containerd://31b1168959efed22941adfa07f224b5bf494f8cb99d07b3bfc6ad4248823222f
-#           exitCode: 0
-#           finishedAt: "2024-04-30T02:21:12Z"
-#           message: '[{"key":"StartedAt","value":"2024-04-30T02:21:12.604Z","type":3}]'
-#           reason: Completed
-#           startedAt: "2024-04-30T02:21:10Z"
-#   hostIP: 192.168.137.27
-#   initContainerStatuses:
-#     - containerID: containerd://74e1f2239fd0fc1bceb0d7375910feeadeb213734a056d832cebf2372514c3ac
-#       image: ghcr.io/lanzhiwang/tekton-releases/tektoncd/pipeline/cmd/entrypoint:v0.57.0
-#       imageID: ghcr.io/lanzhiwang/tekton-releases/tektoncd/pipeline/cmd/entrypoint@sha256:2aedd9b42d8ba49bf88de4bb6e789088ce3f6ac34cd8303dad18c2608e8f4008
-#       lastState: {}
-#       name: prepare
-#       ready: true
-#       restartCount: 0
-#       state:
-#         terminated:
-#           containerID: containerd://74e1f2239fd0fc1bceb0d7375910feeadeb213734a056d832cebf2372514c3ac
-#           exitCode: 0
-#           finishedAt: "2024-04-30T02:20:58Z"
-#           reason: Completed
-#           startedAt: "2024-04-30T02:20:58Z"
-#   phase: Succeeded
-#   podIP: 10.3.0.104
-#   podIPs:
-#     - ip: 10.3.0.104
-#   qosClass: BestEffort
-#   startTime: "2024-04-30T02:20:57Z"
+
+# ---
+# $ kubectl logs  tkn-arg-test-8qqs7-pod
+# Defaulted container "step-echo-cli" out of: step-echo-cli, prepare (init)
+# init foo bar
+

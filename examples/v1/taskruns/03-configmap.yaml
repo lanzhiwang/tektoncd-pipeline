@@ -37,7 +37,6 @@ spec:
 #   annotations:
 #     pipeline.tekton.dev/release: d714545
 #     tekton.dev/ready: READY
-#   creationTimestamp: "2024-04-30T03:00:17Z"
 #   labels:
 #     app.kubernetes.io/managed-by: tekton-pipelines
 #     tekton.dev/taskRun: configmap-m6wgj
@@ -50,8 +49,6 @@ spec:
 #       kind: TaskRun
 #       name: configmap-m6wgj
 #       uid: 67b0c550-9f33-4b38-94e3-6aaa1b18c150
-#   resourceVersion: "430012"
-#   uid: 9fd87b28-e6b1-4a7c-baf5-6d8e50d7983a
 # spec:
 #   activeDeadlineSeconds: 5400
 #   containers:
@@ -225,77 +222,3 @@ spec:
 #                     apiVersion: v1
 #                     fieldPath: metadata.namespace
 #                   path: namespace
-# status:
-#   conditions:
-#     - lastProbeTime: null
-#       lastTransitionTime: "2024-04-30T03:00:20Z"
-#       reason: PodCompleted
-#       status: "True"
-#       type: Initialized
-#     - lastProbeTime: null
-#       lastTransitionTime: "2024-04-30T03:00:37Z"
-#       reason: PodCompleted
-#       status: "False"
-#       type: Ready
-#     - lastProbeTime: null
-#       lastTransitionTime: "2024-04-30T03:00:37Z"
-#       reason: PodCompleted
-#       status: "False"
-#       type: ContainersReady
-#     - lastProbeTime: null
-#       lastTransitionTime: "2024-04-30T03:00:17Z"
-#       status: "True"
-#       type: PodScheduled
-#   containerStatuses:
-#     - containerID: containerd://372e425ab25e869e6c807a03e0ebe5d1c3afbd907390a87469d158eee24c2d36
-#       image: docker.io/library/ubuntu:latest
-#       imageID: docker.io/library/ubuntu@sha256:562456a05a0dbd62a671c1854868862a4687bf979a96d48ae8e766642cd911e8
-#       lastState: {}
-#       name: step-secret
-#       ready: false
-#       restartCount: 0
-#       started: false
-#       state:
-#         terminated:
-#           containerID: containerd://372e425ab25e869e6c807a03e0ebe5d1c3afbd907390a87469d158eee24c2d36
-#           exitCode: 0
-#           finishedAt: "2024-04-30T03:00:37Z"
-#           message: '[{"key":"StartedAt","value":"2024-04-30T03:00:37.290Z","type":3}]'
-#           reason: Completed
-#           startedAt: "2024-04-30T03:00:35Z"
-#   hostIP: 192.168.137.27
-#   initContainerStatuses:
-#     - containerID: containerd://6b18e0c2fcc6e82a65033c753eeffb28f639168bf69999cd8cd83464f9de25b7
-#       image: ghcr.io/lanzhiwang/tekton-releases/tektoncd/pipeline/cmd/entrypoint:v0.57.0
-#       imageID: ghcr.io/lanzhiwang/tekton-releases/tektoncd/pipeline/cmd/entrypoint@sha256:2aedd9b42d8ba49bf88de4bb6e789088ce3f6ac34cd8303dad18c2608e8f4008
-#       lastState: {}
-#       name: prepare
-#       ready: true
-#       restartCount: 0
-#       state:
-#         terminated:
-#           containerID: containerd://6b18e0c2fcc6e82a65033c753eeffb28f639168bf69999cd8cd83464f9de25b7
-#           exitCode: 0
-#           finishedAt: "2024-04-30T03:00:18Z"
-#           reason: Completed
-#           startedAt: "2024-04-30T03:00:18Z"
-#     - containerID: containerd://62af4e4f0b983e44b44dce7c30feb38452c623086f800cb5dc46a4001e739c32
-#       image: ghcr.io/lanzhiwang/chainguard/busybox:v1.0.0
-#       imageID: ghcr.io/lanzhiwang/chainguard/busybox@sha256:48604a9f16721131879bbbbb05f28df84f82d3a83ff11fe523a293f485cd3591
-#       lastState: {}
-#       name: place-scripts
-#       ready: true
-#       restartCount: 0
-#       state:
-#         terminated:
-#           containerID: containerd://62af4e4f0b983e44b44dce7c30feb38452c623086f800cb5dc46a4001e739c32
-#           exitCode: 0
-#           finishedAt: "2024-04-30T03:00:20Z"
-#           reason: Completed
-#           startedAt: "2024-04-30T03:00:20Z"
-#   phase: Succeeded
-#   podIP: 10.3.0.106
-#   podIPs:
-#     - ip: 10.3.0.106
-#   qosClass: BestEffort
-#   startTime: "2024-04-30T03:00:17Z"

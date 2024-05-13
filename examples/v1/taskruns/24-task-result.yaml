@@ -13,12 +13,491 @@ spec:
         description: The current date in human readable format
     steps:
       - name: print-date-unix-timestamp
-        image: bash:latest
+        image: ubuntu
         script: |
           #!/usr/bin/env bash
+          set -x
+
+          apt-get update
+          apt-get install -y tree
+          tree -a /tekton
+          tree -a /workspace
+
           date +%s | tee $(results.current-date-unix-timestamp.path)
+
+          tree -a /tekton
+          tree -a /workspace
+
       - name: print-date-human-readable
-        image: bash:latest
+        image: ubuntu
         script: |
           #!/usr/bin/env bash
+          set -x
+
+          apt-get update
+          apt-get install -y tree
+          tree -a /tekton
+          tree -a /workspace
+
           date | tee $(results.current-date-human-readable.path)
+
+          tree -a /tekton
+          tree -a /workspace
+
+# ---
+# apiVersion: v1
+# kind: Pod
+# metadata:
+#   annotations:
+#     pipeline.tekton.dev/release: d714545
+#     tekton.dev/ready: READY
+#   labels:
+#     app.kubernetes.io/managed-by: tekton-pipelines
+#     tekton.dev/taskRun: print-date-4h9cg
+#   name: print-date-4h9cg-pod
+#   namespace: default
+#   ownerReferences:
+#     - apiVersion: tekton.dev/v1
+#       blockOwnerDeletion: true
+#       controller: true
+#       kind: TaskRun
+#       name: print-date-4h9cg
+#       uid: 2f0fb7c9-869c-45ed-af60-29afc5e74f26
+# spec:
+#   activeDeadlineSeconds: 5400
+#   containers:
+#     - args:
+#         - -wait_file
+#         - /tekton/downward/ready
+#         - -wait_file_content
+#         - -post_file
+#         - /tekton/run/0/out
+#         - -termination_path
+#         - /tekton/termination
+#         - -step_metadata_dir
+#         - /tekton/run/0/status
+#         - -results
+#         - current-date-unix-timestamp,current-date-human-readable
+#         - -entrypoint
+#         - /tekton/scripts/script-0-9qf4r
+#         - --
+#       command:
+#         - /tekton/bin/entrypoint
+#       image: ubuntu
+#       imagePullPolicy: Always
+#       name: step-print-date-unix-timestamp
+#       resources: {}
+#       terminationMessagePath: /tekton/termination
+#       terminationMessagePolicy: File
+#       volumeMounts:
+#         - mountPath: /tekton/scripts
+#           name: tekton-internal-scripts
+#           readOnly: true
+#         - mountPath: /tekton/downward
+#           name: tekton-internal-downward
+#           readOnly: true
+#         - mountPath: /tekton/creds
+#           name: tekton-creds-init-home-0
+#         - mountPath: /tekton/run/0
+#           name: tekton-internal-run-0
+#         - mountPath: /tekton/run/1
+#           name: tekton-internal-run-1
+#           readOnly: true
+#         - mountPath: /tekton/bin
+#           name: tekton-internal-bin
+#           readOnly: true
+#         - mountPath: /workspace
+#           name: tekton-internal-workspace
+#         - mountPath: /tekton/home
+#           name: tekton-internal-home
+#         - mountPath: /tekton/results
+#           name: tekton-internal-results
+#         - mountPath: /tekton/steps
+#           name: tekton-internal-steps
+#           readOnly: true
+#         - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+#           name: kube-api-access-bh4k7
+#           readOnly: true
+#     - args:
+#         - -wait_file
+#         - /tekton/run/0/out
+#         - -post_file
+#         - /tekton/run/1/out
+#         - -termination_path
+#         - /tekton/termination
+#         - -step_metadata_dir
+#         - /tekton/run/1/status
+#         - -results
+#         - current-date-unix-timestamp,current-date-human-readable
+#         - -entrypoint
+#         - /tekton/scripts/script-1-2tbcb
+#         - --
+#       command:
+#         - /tekton/bin/entrypoint
+#       image: ubuntu
+#       imagePullPolicy: Always
+#       name: step-print-date-human-readable
+#       resources: {}
+#       terminationMessagePath: /tekton/termination
+#       terminationMessagePolicy: File
+#       volumeMounts:
+#         - mountPath: /tekton/scripts
+#           name: tekton-internal-scripts
+#           readOnly: true
+#         - mountPath: /tekton/creds
+#           name: tekton-creds-init-home-1
+#         - mountPath: /tekton/run/0
+#           name: tekton-internal-run-0
+#           readOnly: true
+#         - mountPath: /tekton/run/1
+#           name: tekton-internal-run-1
+#         - mountPath: /tekton/bin
+#           name: tekton-internal-bin
+#           readOnly: true
+#         - mountPath: /workspace
+#           name: tekton-internal-workspace
+#         - mountPath: /tekton/home
+#           name: tekton-internal-home
+#         - mountPath: /tekton/results
+#           name: tekton-internal-results
+#         - mountPath: /tekton/steps
+#           name: tekton-internal-steps
+#           readOnly: true
+#         - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+#           name: kube-api-access-bh4k7
+#           readOnly: true
+#   dnsPolicy: ClusterFirst
+#   enableServiceLinks: true
+#   initContainers:
+#     - command:
+#         - /ko-app/entrypoint
+#         - init
+#         - /ko-app/entrypoint
+#         - /tekton/bin/entrypoint
+#         - step-print-date-unix-timestamp
+#         - step-print-date-human-readable
+#       image: ghcr.io/lanzhiwang/tekton-releases/tektoncd/pipeline/cmd/entrypoint:v0.57.0
+#       imagePullPolicy: IfNotPresent
+#       name: prepare
+#       resources: {}
+#       terminationMessagePath: /dev/termination-log
+#       terminationMessagePolicy: File
+#       volumeMounts:
+#         - mountPath: /tekton/bin
+#           name: tekton-internal-bin
+#         - mountPath: /tekton/steps
+#           name: tekton-internal-steps
+#         - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+#           name: kube-api-access-bh4k7
+#           readOnly: true
+#       workingDir: /
+#     - args:
+#         - -c
+#         - |
+#           scriptfile="/tekton/scripts/script-0-9qf4r"
+#           touch ${scriptfile} && chmod +x ${scriptfile}
+#           cat > ${scriptfile} << '_EOF_'
+#           IyEvdXNyL2Jpbi9lbnYgYmFzaApzZXQgLXgKCmFwdC1nZXQgdXBkYXRlCmFwdC1nZXQgaW5zdGFsbCAteSB0cmVlCnRyZWUgLWEgL3Rla3Rvbgp0cmVlIC1hIC93b3Jrc3BhY2UKCmRhdGUgKyVzIHwgdGVlIC90ZWt0b24vcmVzdWx0cy9jdXJyZW50LWRhdGUtdW5peC10aW1lc3RhbXAKCnRyZWUgLWEgL3Rla3Rvbgp0cmVlIC1hIC93b3Jrc3BhY2UK
+#           _EOF_
+#           /tekton/bin/entrypoint decode-script "${scriptfile}"
+#           scriptfile="/tekton/scripts/script-1-2tbcb"
+#           touch ${scriptfile} && chmod +x ${scriptfile}
+#           cat > ${scriptfile} << '_EOF_'
+#           IyEvdXNyL2Jpbi9lbnYgYmFzaApzZXQgLXgKCmFwdC1nZXQgdXBkYXRlCmFwdC1nZXQgaW5zdGFsbCAteSB0cmVlCnRyZWUgLWEgL3Rla3Rvbgp0cmVlIC1hIC93b3Jrc3BhY2UKCmRhdGUgfCB0ZWUgL3Rla3Rvbi9yZXN1bHRzL2N1cnJlbnQtZGF0ZS1odW1hbi1yZWFkYWJsZQoKdHJlZSAtYSAvdGVrdG9uCnRyZWUgLWEgL3dvcmtzcGFjZQo=
+#           _EOF_
+#           /tekton/bin/entrypoint decode-script "${scriptfile}"
+#       command:
+#         - sh
+#       image: ghcr.io/lanzhiwang/chainguard/busybox:v1.0.0
+#       imagePullPolicy: IfNotPresent
+#       name: place-scripts
+#       resources: {}
+#       terminationMessagePath: /dev/termination-log
+#       terminationMessagePolicy: File
+#       volumeMounts:
+#         - mountPath: /tekton/scripts
+#           name: tekton-internal-scripts
+#         - mountPath: /tekton/bin
+#           name: tekton-internal-bin
+#         - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+#           name: kube-api-access-bh4k7
+#           readOnly: true
+#   nodeName: 192.168.143.6
+#   preemptionPolicy: PreemptLowerPriority
+#   priority: 0
+#   restartPolicy: Never
+#   schedulerName: default-scheduler
+#   securityContext: {}
+#   serviceAccount: default
+#   serviceAccountName: default
+#   terminationGracePeriodSeconds: 30
+#   tolerations:
+#     - effect: NoExecute
+#       key: node.kubernetes.io/not-ready
+#       operator: Exists
+#       tolerationSeconds: 30
+#     - effect: NoExecute
+#       key: node.kubernetes.io/unreachable
+#       operator: Exists
+#       tolerationSeconds: 30
+#   volumes:
+#     - emptyDir: {}
+#       name: tekton-internal-workspace
+#     - emptyDir: {}
+#       name: tekton-internal-home
+#     - emptyDir: {}
+#       name: tekton-internal-results
+#     - emptyDir: {}
+#       name: tekton-internal-steps
+#     - emptyDir: {}
+#       name: tekton-internal-scripts
+#     - emptyDir: {}
+#       name: tekton-internal-bin
+#     - downwardAPI:
+#         defaultMode: 420
+#         items:
+#           - fieldRef:
+#               apiVersion: v1
+#               fieldPath: metadata.annotations['tekton.dev/ready']
+#             path: ready
+#       name: tekton-internal-downward
+#     - emptyDir:
+#         medium: Memory
+#       name: tekton-creds-init-home-0
+#     - emptyDir: {}
+#       name: tekton-internal-run-0
+#     - emptyDir:
+#         medium: Memory
+#       name: tekton-creds-init-home-1
+#     - emptyDir: {}
+#       name: tekton-internal-run-1
+#     - name: kube-api-access-bh4k7
+#       projected:
+#         defaultMode: 420
+#         sources:
+#           - serviceAccountToken:
+#               expirationSeconds: 3607
+#               path: token
+#           - configMap:
+#               items:
+#                 - key: ca.crt
+#                   path: ca.crt
+#               name: kube-root-ca.crt
+#           - downwardAPI:
+#               items:
+#                 - fieldRef:
+#                     apiVersion: v1
+#                     fieldPath: metadata.namespace
+#                   path: namespace
+
+# $ kubectl logs print-date-4h9cg-pod -c step-print-date-unix-timestamp
+# + apt-get update
+# Get:1 http://security.ubuntu.com/ubuntu noble-security InRelease [89.7 kB]
+# Get:2 http://archive.ubuntu.com/ubuntu noble InRelease [256 kB]
+# Get:3 http://security.ubuntu.com/ubuntu noble-security/main amd64 Packages [31.0 kB]
+# Get:4 http://security.ubuntu.com/ubuntu noble-security/universe amd64 Packages [11.8 kB]
+# Get:5 http://archive.ubuntu.com/ubuntu noble-updates InRelease [89.7 kB]
+# Get:6 http://archive.ubuntu.com/ubuntu noble-backports InRelease [89.7 kB]
+# Get:7 http://archive.ubuntu.com/ubuntu noble/main amd64 Packages [1808 kB]
+# Get:8 http://archive.ubuntu.com/ubuntu noble/universe amd64 Packages [19.3 MB]
+# Get:9 http://archive.ubuntu.com/ubuntu noble/restricted amd64 Packages [117 kB]
+# Get:10 http://archive.ubuntu.com/ubuntu noble/multiverse amd64 Packages [331 kB]
+# Get:11 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages [33.0 kB]
+# Get:12 http://archive.ubuntu.com/ubuntu noble-updates/universe amd64 Packages [20.1 kB]
+# Get:13 http://archive.ubuntu.com/ubuntu noble-backports/universe amd64 Packages [4224 B]
+# Fetched 22.2 MB in 38s (589 kB/s)
+# Reading package lists...
+# + apt-get install -y tree
+# Reading package lists...
+# Building dependency tree...
+# Reading state information...
+# The following NEW packages will be installed:
+#   tree
+# 0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded.
+# Need to get 47.1 kB of archives.
+# After this operation, 111 kB of additional disk space will be used.
+# Get:1 http://archive.ubuntu.com/ubuntu noble/universe amd64 tree amd64 2.1.1-2ubuntu3 [47.1 kB]
+# debconf: delaying package configuration, since apt-utils is not installed
+# Fetched 47.1 kB in 1s (50.5 kB/s)
+# Selecting previously unselected package tree.
+# (Reading database ... 4368 files and directories currently installed.)
+# Preparing to unpack .../tree_2.1.1-2ubuntu3_amd64.deb ...
+# Unpacking tree (2.1.1-2ubuntu3) ...
+# Setting up tree (2.1.1-2ubuntu3) ...
+# + tree -a /tekton
+# /tekton
+# |-- bin
+# |   `-- entrypoint
+# |-- creds
+# |-- downward
+# |   |-- ..2024_05_13_10_12_03.3652407285
+# |   |   `-- ready
+# |   |-- ..data -> ..2024_05_13_10_12_03.3652407285
+# |   `-- ready -> ..data/ready
+# |-- home
+# |-- results
+# |-- run
+# |   |-- 0
+# |   |   `-- status
+# |   |       `-- results
+# |   `-- 1
+# |       `-- status
+# |           `-- results
+# |-- scripts
+# |   |-- script-0-9qf4r
+# |   `-- script-1-2tbcb
+# |-- steps
+# |   |-- 0 -> /tekton/run/0/status
+# |   |-- 1 -> /tekton/run/1/status
+# |   |-- step-print-date-human-readable -> /tekton/run/1/status
+# |   `-- step-print-date-unix-timestamp -> /tekton/run/0/status
+# `-- termination
+
+# 21 directories, 6 files
+# + tree -a /workspace
+# /workspace
+
+# 0 directories, 0 files
+# + date +%s
+# + tee /tekton/results/current-date-unix-timestamp
+# + tree -a /tekton
+# 1715595167
+# /tekton
+# |-- bin
+# |   `-- entrypoint
+# |-- creds
+# |-- downward
+# |   |-- ..2024_05_13_10_12_03.3652407285
+# |   |   `-- ready
+# |   |-- ..data -> ..2024_05_13_10_12_03.3652407285
+# |   `-- ready -> ..data/ready
+# |-- home
+# |-- results
+# |   `-- current-date-unix-timestamp
+# |-- run
+# |   |-- 0
+# |   |   `-- status
+# |   |       `-- results
+# |   `-- 1
+# |       `-- status
+# |           `-- results
+# |-- scripts
+# |   |-- script-0-9qf4r
+# |   `-- script-1-2tbcb
+# |-- steps
+# |   |-- 0 -> /tekton/run/0/status
+# |   |-- 1 -> /tekton/run/1/status
+# |   |-- step-print-date-human-readable -> /tekton/run/1/status
+# |   `-- step-print-date-unix-timestamp -> /tekton/run/0/status
+# `-- termination
+
+# 21 directories, 7 files
+# + tree -a /workspace
+# /workspace
+
+# 0 directories, 0 files
+# $
+
+# $ kubectl logs print-date-4h9cg-pod -c step-print-date-human-readable
+# + apt-get update
+# Get:1 http://archive.ubuntu.com/ubuntu noble InRelease [256 kB]
+# Get:2 http://security.ubuntu.com/ubuntu noble-security InRelease [89.7 kB]
+# Get:3 http://archive.ubuntu.com/ubuntu noble-updates InRelease [89.7 kB]
+# Get:4 http://security.ubuntu.com/ubuntu noble-security/main amd64 Packages [31.0 kB]
+# Get:5 http://archive.ubuntu.com/ubuntu noble-backports InRelease [89.7 kB]
+# Get:6 http://security.ubuntu.com/ubuntu noble-security/universe amd64 Packages [11.8 kB]
+# Get:7 http://archive.ubuntu.com/ubuntu noble/restricted amd64 Packages [117 kB]
+# Get:8 http://archive.ubuntu.com/ubuntu noble/universe amd64 Packages [19.3 MB]
+# Get:9 http://archive.ubuntu.com/ubuntu noble/main amd64 Packages [1808 kB]
+# Get:10 http://archive.ubuntu.com/ubuntu noble/multiverse amd64 Packages [331 kB]
+# Get:11 http://archive.ubuntu.com/ubuntu noble-updates/universe amd64 Packages [20.1 kB]
+# Get:12 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages [33.0 kB]
+# Get:13 http://archive.ubuntu.com/ubuntu noble-backports/universe amd64 Packages [4224 B]
+# Fetched 22.2 MB in 29s (766 kB/s)
+# Reading package lists...
+# + apt-get install -y tree
+# Reading package lists...
+# Building dependency tree...
+# Reading state information...
+# The following NEW packages will be installed:
+#   tree
+# 0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded.
+# Need to get 47.1 kB of archives.
+# After this operation, 111 kB of additional disk space will be used.
+# Get:1 http://archive.ubuntu.com/ubuntu noble/universe amd64 tree amd64 2.1.1-2ubuntu3 [47.1 kB]
+# debconf: delaying package configuration, since apt-utils is not installed
+# Fetched 47.1 kB in 1s (33.4 kB/s)
+# Selecting previously unselected package tree.
+# (Reading database ... 4368 files and directories currently installed.)
+# Preparing to unpack .../tree_2.1.1-2ubuntu3_amd64.deb ...
+# Unpacking tree (2.1.1-2ubuntu3) ...
+# Setting up tree (2.1.1-2ubuntu3) ...
+# + tree -a /tekton
+# /tekton
+# |-- bin
+# |   `-- entrypoint
+# |-- creds
+# |-- home
+# |-- results
+# |   `-- current-date-unix-timestamp
+# |-- run
+# |   |-- 0
+# |   |   |-- out
+# |   |   `-- status
+# |   |       |-- exitCode
+# |   |       `-- results
+# |   `-- 1
+# |       `-- status
+# |           `-- results
+# |-- scripts
+# |   |-- script-0-9qf4r
+# |   `-- script-1-2tbcb
+# |-- steps
+# |   |-- 0 -> /tekton/run/0/status
+# |   |-- 1 -> /tekton/run/1/status
+# |   |-- step-print-date-human-readable -> /tekton/run/1/status
+# |   `-- step-print-date-unix-timestamp -> /tekton/run/0/status
+# `-- termination
+
+# 18 directories, 7 files
+# /workspace
+
+# 0 directories, 0 files
+# + tree -a /workspace
+# + date
+# + tee /tekton/results/current-date-human-readable
+# + tree -a /tekton
+# + tree -a /workspace
+# Mon May 13 10:13:21 UTC 2024
+# /tekton
+# |-- bin
+# |   `-- entrypoint
+# |-- creds
+# |-- home
+# |-- results
+# |   |-- current-date-human-readable
+# |   `-- current-date-unix-timestamp
+# |-- run
+# |   |-- 0
+# |   |   |-- out
+# |   |   `-- status
+# |   |       |-- exitCode
+# |   |       `-- results
+# |   `-- 1
+# |       `-- status
+# |           `-- results
+# |-- scripts
+# |   |-- script-0-9qf4r
+# |   `-- script-1-2tbcb
+# |-- steps
+# |   |-- 0 -> /tekton/run/0/status
+# |   |-- 1 -> /tekton/run/1/status
+# |   |-- step-print-date-human-readable -> /tekton/run/1/status
+# |   `-- step-print-date-unix-timestamp -> /tekton/run/0/status
+# `-- termination
+
+# 18 directories, 8 files
+# /workspace
+
+# 0 directories, 0 files
+# $

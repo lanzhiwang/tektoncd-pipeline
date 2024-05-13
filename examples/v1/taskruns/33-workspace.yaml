@@ -1,128 +1,116 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: my-pvc
+spec:
+  storageClassName: sc-topolvm
+  resources:
+    requests:
+      storage: 2Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: my-configmap
+data:
+  message: hello world
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: my-secret
+type: Opaque
+stringData:
+  username: user
+data:
+  message: aGVsbG8gc2VjcmV0
+---
 apiVersion: tekton.dev/v1
 kind: TaskRun
 metadata:
-  name: entrypoint-resolution
+  generateName: custom-volume-
 spec:
+  workspaces:
+    - name: custom
+      persistentVolumeClaim:
+        claimName: my-pvc
+      subPath: my-subdir
+    - name: custom2
+      persistentVolumeClaim:
+        claimName: my-pvc
+    - name: custom3
+      emptyDir: {}
+      subPath: testing
+    - name: custom4
+      configMap:
+        name: my-configmap
+        items:
+          - key: message
+            path: my-message.txt
+    - name: custom5
+      secret:
+        secretName: my-secret
   taskSpec:
     steps:
-      # Multi-arch image with no command defined. We should look up the command
-      # for each platform-specific image and pass it to the Pod, which selects
-      # the right command at runtime based on the node's runtime platform.
-      - image: ghcr.io/lanzhiwang/tekton-releases/tektoncd/pipeline/cmd/nop:v0.57.0
-        name: step1
-        # /tekton/bin/entrypoint \
-        # -wait_file /tekton/downward/ready -wait_file_content \
-        # -post_file /tekton/run/0/out \
-        # -termination_path /tekton/termination \
-        # -step_metadata_dir /tekton/run/0/status --
-
-      # Multi-arch image with no command defined, but with args. We'll look
-      # up the commands and pass it to the entrypoint binary via env var, then
-      # append the specified args.
-      - image: ubuntu
-        args: ["-c", "echo", "hello"]
-        name: step2
-        # /tekton/bin/entrypoint \
-        # -wait_file /tekton/run/0/out \
-        # -post_file /tekton/run/1/out \
-        # -termination_path /tekton/termination \
-        # -step_metadata_dir /tekton/run/1/status \
-        # -- -c echo hello
-
-      # Multi-arch image, but since we specify `script` we don't need to look it
-      # up and pass it down.
-      - image: ubuntu
-        script: echo hello
-        name: step3
-        # /tekton/bin/entrypoint \
-        # -wait_file /tekton/run/1/out \
-        # -post_file /tekton/run/2/out \
-        # -termination_path /tekton/termination \
-        # -step_metadata_dir /tekton/run/2/status \
-        # -entrypoint /tekton/scripts/script-2-56t5v --
-
-      # Multi-arch image, but since we specify `command` and `args` we don't
-      # need to look it up and pass it down.
-      - image: ubuntu
-        command: ["sh", "-c"]
-        args: ["echo hello"]
-        name: step4
-        # /tekton/bin/entrypoint \
-        # -wait_file /tekton/run/2/out \
-        # -post_file /tekton/run/3/out \
-        # -termination_path /tekton/termination \
-        # -step_metadata_dir /tekton/run/3/status \
-        # -entrypoint sh -- -c echo hello
-
-      # Single-platform image with no command defined. We should look up the one
-      # and only command value and pass it to the Pod.
-      - image: amd64/ubuntu
-        name: step5
-        # /tekton/bin/entrypoint \
-        # -wait_file /tekton/run/3/out \
-        # -post_file /tekton/run/4/out \
-        # -termination_path /tekton/termination \
-        # -step_metadata_dir /tekton/run/4/status \
-        # --
-
-      # Single-platform image with no command defined, but with args. We'll look
-      # up the one command and pass it to the entrypoint binary, then append the
-      # specified args.
-      - image: amd64/ubuntu
-        args: ["-c", "echo", "hello"]
-        name: step6
-        # /tekton/bin/entrypoint \
-        # -wait_file /tekton/run/4/out \
-        # -post_file /tekton/run/5/out \
-        # -termination_path /tekton/termination \
-        # -step_metadata_dir /tekton/run/5/status \
-        # -- -c echo hello
-
-      # Single-platform image, but since we specify `script` we don't need to
-      # look it up and pass it down.
-      - image: amd64/ubuntu
-        script: echo hello
-        name: step7
-        # /tekton/bin/entrypoint \
-        # -wait_file /tekton/run/5/out \
-        # -post_file /tekton/run/6/out \
-        # -termination_path /tekton/termination \
-        # -step_metadata_dir /tekton/run/6/status \
-        # -entrypoint /tekton/scripts/script-6-g7qtr --
-
-      # Single-platform image, but since we specify `command` and `args` we
-      # don't need to look it up and pass it down.
-      - image: amd64/ubuntu
-        command: ["sh", "-c"]
-        args: ["echo hello"]
-        name: step8
-        # /tekton/bin/entrypoint \
-        # -wait_file /tekton/run/6/out \
-        # -post_file /tekton/run/7/out \
-        # -termination_path /tekton/termination \
-        # -step_metadata_dir /tekton/run/7/status \
-        # -entrypoint sh -- -c echo hello
+      - name: write
+        image: ubuntu
+        script: echo $(workspaces.custom.volume) > $(workspaces.custom.path)/foo
+      - name: read
+        image: ubuntu
+        script: cat $(workspaces.custom.path)/foo | grep $(workspaces.custom.volume)
+      - name: write2
+        image: ubuntu
+        script: echo $(workspaces.custom2.path) > $(workspaces.custom2.path)/foo
+      - name: read2
+        image: ubuntu
+        script: cat $(workspaces.custom2.path)/foo | grep $(workspaces.custom2.path)
+      - name: write3
+        image: ubuntu
+        script: echo $(workspaces.custom3.path) > $(workspaces.custom3.path)/foo
+      - name: read3
+        image: ubuntu
+        script: cat $(workspaces.custom3.path)/foo | grep $(workspaces.custom3.path)
+      - name: readconfigmap
+        image: ubuntu
+        script: cat $(workspaces.custom4.path)/my-message.txt | grep "hello world"
+      - name: readsecret
+        image: ubuntu
+        script: |
+          #!/usr/bin/env bash
+          set -xe
+          cat $(workspaces.custom5.path)/username | grep "user"
+          cat $(workspaces.custom5.path)/message | grep "hello secret"
+    workspaces:
+      - name: custom
+      - name: custom2
+        mountPath: /foo/bar/baz
+      - name: custom3
+      - name: custom4
+        mountPath: /baz/bar/quux
+      - name: custom5
+        mountPath: /my/secret/volume
 # ---
 # apiVersion: v1
 # kind: Pod
 # metadata:
 #   annotations:
-#     kubectl.kubernetes.io/last-applied-configuration: |
-#       {"apiVersion":"tekton.dev/v1","kind":"TaskRun","metadata":{"annotations":{},"name":"entrypoint-resolution","namespace":"default"},"spec":{"taskSpec":{"steps":[{"image":"ghcr.io/lanzhiwang/tekton-releases/tektoncd/pipeline/cmd/nop:v0.57.0","name":"step1"},{"args":["-c","echo","hello"],"image":"ubuntu","name":"step2"},{"image":"ubuntu","name":"step3","script":"echo hello"},{"args":["echo hello"],"command":["sh","-c"],"image":"ubuntu","name":"step4"},{"image":"amd64/ubuntu","name":"step5"},{"args":["-c","echo","hello"],"image":"amd64/ubuntu","name":"step6"},{"image":"amd64/ubuntu","name":"step7","script":"echo hello"},{"args":["echo hello"],"command":["sh","-c"],"image":"amd64/ubuntu","name":"step8"}]}}}
 #     pipeline.tekton.dev/release: d714545
 #     tekton.dev/ready: READY
 #   labels:
 #     app.kubernetes.io/managed-by: tekton-pipelines
-#     tekton.dev/taskRun: entrypoint-resolution
-#   name: entrypoint-resolution-pod
+#     tekton.dev/taskRun: custom-volume-dpx85
+#   name: custom-volume-dpx85-pod
 #   namespace: default
 #   ownerReferences:
 #     - apiVersion: tekton.dev/v1
 #       blockOwnerDeletion: true
 #       controller: true
 #       kind: TaskRun
-#       name: entrypoint-resolution
-#       uid: 04b75375-45e2-400b-a618-bade730a75a9
+#       name: custom-volume-dpx85
+#       uid: 7ac80a30-543d-4097-a44f-4f28de4c33e8
 # spec:
 #   activeDeadlineSeconds: 5400
 #   containers:
@@ -136,19 +124,33 @@ spec:
 #         - /tekton/termination
 #         - -step_metadata_dir
 #         - /tekton/run/0/status
+#         - -entrypoint
+#         - /tekton/scripts/script-0-dhmdg
 #         - --
 #       command:
 #         - /tekton/bin/entrypoint
-#       env:
-#         - name: TEKTON_PLATFORM_COMMANDS
-#           value: '{"linux/amd64":["/ko-app/nop"]}'
-#       image: ghcr.io/lanzhiwang/tekton-releases/tektoncd/pipeline/cmd/nop@sha256:fe85d59dc0a89d5a40f834f840e42490feb9237ccd968a91bce122ee7ba67fed
-#       imagePullPolicy: IfNotPresent
-#       name: step-step1
+#       image: ubuntu
+#       imagePullPolicy: Always
+#       name: step-write
 #       resources: {}
 #       terminationMessagePath: /tekton/termination
 #       terminationMessagePolicy: File
 #       volumeMounts:
+#         - mountPath: /workspace/custom
+#           name: ws-2c9lv
+#           subPath: my-subdir
+#         - mountPath: /foo/bar/baz
+#           name: ws-2c9lv
+#         - mountPath: /workspace/custom3
+#           name: ws-tjx88
+#           subPath: testing
+#         - mountPath: /baz/bar/quux
+#           name: ws-42hjm
+#         - mountPath: /my/secret/volume
+#           name: ws-b287s
+#         - mountPath: /tekton/scripts
+#           name: tekton-internal-scripts
+#           readOnly: true
 #         - mountPath: /tekton/downward
 #           name: tekton-internal-downward
 #           readOnly: true
@@ -190,7 +192,7 @@ spec:
 #           name: tekton-internal-steps
 #           readOnly: true
 #         - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
-#           name: kube-api-access-s7v4f
+#           name: kube-api-access-5dz7f
 #           readOnly: true
 #     - args:
 #         - -wait_file
@@ -201,22 +203,33 @@ spec:
 #         - /tekton/termination
 #         - -step_metadata_dir
 #         - /tekton/run/1/status
+#         - -entrypoint
+#         - /tekton/scripts/script-1-pz2ng
 #         - --
-#         - -c
-#         - echo
-#         - hello
 #       command:
 #         - /tekton/bin/entrypoint
-#       env:
-#         - name: TEKTON_PLATFORM_COMMANDS
-#           value: '{"linux/amd64":["/bin/bash"],"linux/arm/v7":["/bin/bash"],"linux/arm64/v8":["/bin/bash"],"linux/ppc64le":["/bin/bash"],"linux/s390x":["/bin/bash"]}'
-#       image: index.docker.io/library/ubuntu@sha256:562456a05a0dbd62a671c1854868862a4687bf979a96d48ae8e766642cd911e8
-#       imagePullPolicy: IfNotPresent
-#       name: step-step2
+#       image: ubuntu
+#       imagePullPolicy: Always
+#       name: step-read
 #       resources: {}
 #       terminationMessagePath: /tekton/termination
 #       terminationMessagePolicy: File
 #       volumeMounts:
+#         - mountPath: /workspace/custom
+#           name: ws-2c9lv
+#           subPath: my-subdir
+#         - mountPath: /foo/bar/baz
+#           name: ws-2c9lv
+#         - mountPath: /workspace/custom3
+#           name: ws-tjx88
+#           subPath: testing
+#         - mountPath: /baz/bar/quux
+#           name: ws-42hjm
+#         - mountPath: /my/secret/volume
+#           name: ws-b287s
+#         - mountPath: /tekton/scripts
+#           name: tekton-internal-scripts
+#           readOnly: true
 #         - mountPath: /tekton/creds
 #           name: tekton-creds-init-home-1
 #         - mountPath: /tekton/run/0
@@ -255,7 +268,7 @@ spec:
 #           name: tekton-internal-steps
 #           readOnly: true
 #         - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
-#           name: kube-api-access-s7v4f
+#           name: kube-api-access-5dz7f
 #           readOnly: true
 #     - args:
 #         - -wait_file
@@ -267,17 +280,29 @@ spec:
 #         - -step_metadata_dir
 #         - /tekton/run/2/status
 #         - -entrypoint
-#         - /tekton/scripts/script-2-56t5v
+#         - /tekton/scripts/script-2-dvp22
 #         - --
 #       command:
 #         - /tekton/bin/entrypoint
 #       image: ubuntu
 #       imagePullPolicy: Always
-#       name: step-step3
+#       name: step-write2
 #       resources: {}
 #       terminationMessagePath: /tekton/termination
 #       terminationMessagePolicy: File
 #       volumeMounts:
+#         - mountPath: /workspace/custom
+#           name: ws-2c9lv
+#           subPath: my-subdir
+#         - mountPath: /foo/bar/baz
+#           name: ws-2c9lv
+#         - mountPath: /workspace/custom3
+#           name: ws-tjx88
+#           subPath: testing
+#         - mountPath: /baz/bar/quux
+#           name: ws-42hjm
+#         - mountPath: /my/secret/volume
+#           name: ws-b287s
 #         - mountPath: /tekton/scripts
 #           name: tekton-internal-scripts
 #           readOnly: true
@@ -319,7 +344,7 @@ spec:
 #           name: tekton-internal-steps
 #           readOnly: true
 #         - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
-#           name: kube-api-access-s7v4f
+#           name: kube-api-access-5dz7f
 #           readOnly: true
 #     - args:
 #         - -wait_file
@@ -331,19 +356,32 @@ spec:
 #         - -step_metadata_dir
 #         - /tekton/run/3/status
 #         - -entrypoint
-#         - sh
+#         - /tekton/scripts/script-3-9dh94
 #         - --
-#         - -c
-#         - echo hello
 #       command:
 #         - /tekton/bin/entrypoint
 #       image: ubuntu
 #       imagePullPolicy: Always
-#       name: step-step4
+#       name: step-read2
 #       resources: {}
 #       terminationMessagePath: /tekton/termination
 #       terminationMessagePolicy: File
 #       volumeMounts:
+#         - mountPath: /workspace/custom
+#           name: ws-2c9lv
+#           subPath: my-subdir
+#         - mountPath: /foo/bar/baz
+#           name: ws-2c9lv
+#         - mountPath: /workspace/custom3
+#           name: ws-tjx88
+#           subPath: testing
+#         - mountPath: /baz/bar/quux
+#           name: ws-42hjm
+#         - mountPath: /my/secret/volume
+#           name: ws-b287s
+#         - mountPath: /tekton/scripts
+#           name: tekton-internal-scripts
+#           readOnly: true
 #         - mountPath: /tekton/creds
 #           name: tekton-creds-init-home-3
 #         - mountPath: /tekton/run/0
@@ -382,7 +420,7 @@ spec:
 #           name: tekton-internal-steps
 #           readOnly: true
 #         - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
-#           name: kube-api-access-s7v4f
+#           name: kube-api-access-5dz7f
 #           readOnly: true
 #     - args:
 #         - -wait_file
@@ -393,19 +431,33 @@ spec:
 #         - /tekton/termination
 #         - -step_metadata_dir
 #         - /tekton/run/4/status
+#         - -entrypoint
+#         - /tekton/scripts/script-4-jtznx
 #         - --
 #       command:
 #         - /tekton/bin/entrypoint
-#       env:
-#         - name: TEKTON_PLATFORM_COMMANDS
-#           value: '{"linux/amd64":["/bin/bash"]}'
-#       image: index.docker.io/amd64/ubuntu@sha256:28a2b328825ac02db5c29d9356bfba80ba6c4b6ebfcac5a91a4656fa3453775a
-#       imagePullPolicy: IfNotPresent
-#       name: step-step5
+#       image: ubuntu
+#       imagePullPolicy: Always
+#       name: step-write3
 #       resources: {}
 #       terminationMessagePath: /tekton/termination
 #       terminationMessagePolicy: File
 #       volumeMounts:
+#         - mountPath: /workspace/custom
+#           name: ws-2c9lv
+#           subPath: my-subdir
+#         - mountPath: /foo/bar/baz
+#           name: ws-2c9lv
+#         - mountPath: /workspace/custom3
+#           name: ws-tjx88
+#           subPath: testing
+#         - mountPath: /baz/bar/quux
+#           name: ws-42hjm
+#         - mountPath: /my/secret/volume
+#           name: ws-b287s
+#         - mountPath: /tekton/scripts
+#           name: tekton-internal-scripts
+#           readOnly: true
 #         - mountPath: /tekton/creds
 #           name: tekton-creds-init-home-4
 #         - mountPath: /tekton/run/0
@@ -444,7 +496,7 @@ spec:
 #           name: tekton-internal-steps
 #           readOnly: true
 #         - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
-#           name: kube-api-access-s7v4f
+#           name: kube-api-access-5dz7f
 #           readOnly: true
 #     - args:
 #         - -wait_file
@@ -455,22 +507,33 @@ spec:
 #         - /tekton/termination
 #         - -step_metadata_dir
 #         - /tekton/run/5/status
+#         - -entrypoint
+#         - /tekton/scripts/script-5-9qw2q
 #         - --
-#         - -c
-#         - echo
-#         - hello
 #       command:
 #         - /tekton/bin/entrypoint
-#       env:
-#         - name: TEKTON_PLATFORM_COMMANDS
-#           value: '{"linux/amd64":["/bin/bash"]}'
-#       image: index.docker.io/amd64/ubuntu@sha256:28a2b328825ac02db5c29d9356bfba80ba6c4b6ebfcac5a91a4656fa3453775a
-#       imagePullPolicy: IfNotPresent
-#       name: step-step6
+#       image: ubuntu
+#       imagePullPolicy: Always
+#       name: step-read3
 #       resources: {}
 #       terminationMessagePath: /tekton/termination
 #       terminationMessagePolicy: File
 #       volumeMounts:
+#         - mountPath: /workspace/custom
+#           name: ws-2c9lv
+#           subPath: my-subdir
+#         - mountPath: /foo/bar/baz
+#           name: ws-2c9lv
+#         - mountPath: /workspace/custom3
+#           name: ws-tjx88
+#           subPath: testing
+#         - mountPath: /baz/bar/quux
+#           name: ws-42hjm
+#         - mountPath: /my/secret/volume
+#           name: ws-b287s
+#         - mountPath: /tekton/scripts
+#           name: tekton-internal-scripts
+#           readOnly: true
 #         - mountPath: /tekton/creds
 #           name: tekton-creds-init-home-5
 #         - mountPath: /tekton/run/0
@@ -509,7 +572,7 @@ spec:
 #           name: tekton-internal-steps
 #           readOnly: true
 #         - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
-#           name: kube-api-access-s7v4f
+#           name: kube-api-access-5dz7f
 #           readOnly: true
 #     - args:
 #         - -wait_file
@@ -521,17 +584,29 @@ spec:
 #         - -step_metadata_dir
 #         - /tekton/run/6/status
 #         - -entrypoint
-#         - /tekton/scripts/script-6-g7qtr
+#         - /tekton/scripts/script-6-fs5zl
 #         - --
 #       command:
 #         - /tekton/bin/entrypoint
-#       image: amd64/ubuntu
+#       image: ubuntu
 #       imagePullPolicy: Always
-#       name: step-step7
+#       name: step-readconfigmap
 #       resources: {}
 #       terminationMessagePath: /tekton/termination
 #       terminationMessagePolicy: File
 #       volumeMounts:
+#         - mountPath: /workspace/custom
+#           name: ws-2c9lv
+#           subPath: my-subdir
+#         - mountPath: /foo/bar/baz
+#           name: ws-2c9lv
+#         - mountPath: /workspace/custom3
+#           name: ws-tjx88
+#           subPath: testing
+#         - mountPath: /baz/bar/quux
+#           name: ws-42hjm
+#         - mountPath: /my/secret/volume
+#           name: ws-b287s
 #         - mountPath: /tekton/scripts
 #           name: tekton-internal-scripts
 #           readOnly: true
@@ -573,7 +648,7 @@ spec:
 #           name: tekton-internal-steps
 #           readOnly: true
 #         - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
-#           name: kube-api-access-s7v4f
+#           name: kube-api-access-5dz7f
 #           readOnly: true
 #     - args:
 #         - -wait_file
@@ -585,19 +660,32 @@ spec:
 #         - -step_metadata_dir
 #         - /tekton/run/7/status
 #         - -entrypoint
-#         - sh
+#         - /tekton/scripts/script-7-8p7ql
 #         - --
-#         - -c
-#         - echo hello
 #       command:
 #         - /tekton/bin/entrypoint
-#       image: amd64/ubuntu
+#       image: ubuntu
 #       imagePullPolicy: Always
-#       name: step-step8
+#       name: step-readsecret
 #       resources: {}
 #       terminationMessagePath: /tekton/termination
 #       terminationMessagePolicy: File
 #       volumeMounts:
+#         - mountPath: /workspace/custom
+#           name: ws-2c9lv
+#           subPath: my-subdir
+#         - mountPath: /foo/bar/baz
+#           name: ws-2c9lv
+#         - mountPath: /workspace/custom3
+#           name: ws-tjx88
+#           subPath: testing
+#         - mountPath: /baz/bar/quux
+#           name: ws-42hjm
+#         - mountPath: /my/secret/volume
+#           name: ws-b287s
+#         - mountPath: /tekton/scripts
+#           name: tekton-internal-scripts
+#           readOnly: true
 #         - mountPath: /tekton/creds
 #           name: tekton-creds-init-home-7
 #         - mountPath: /tekton/run/0
@@ -636,7 +724,7 @@ spec:
 #           name: tekton-internal-steps
 #           readOnly: true
 #         - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
-#           name: kube-api-access-s7v4f
+#           name: kube-api-access-5dz7f
 #           readOnly: true
 #   dnsPolicy: ClusterFirst
 #   enableServiceLinks: true
@@ -646,14 +734,14 @@ spec:
 #         - init
 #         - /ko-app/entrypoint
 #         - /tekton/bin/entrypoint
-#         - step-step1
-#         - step-step2
-#         - step-step3
-#         - step-step4
-#         - step-step5
-#         - step-step6
-#         - step-step7
-#         - step-step8
+#         - step-write
+#         - step-read
+#         - step-write2
+#         - step-read2
+#         - step-write3
+#         - step-read3
+#         - step-readconfigmap
+#         - step-readsecret
 #       image: ghcr.io/lanzhiwang/tekton-releases/tektoncd/pipeline/cmd/entrypoint:v0.57.0
 #       imagePullPolicy: IfNotPresent
 #       name: prepare
@@ -666,22 +754,58 @@ spec:
 #         - mountPath: /tekton/steps
 #           name: tekton-internal-steps
 #         - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
-#           name: kube-api-access-s7v4f
+#           name: kube-api-access-5dz7f
 #           readOnly: true
 #       workingDir: /
 #     - args:
 #         - -c
 #         - |
-#           scriptfile="/tekton/scripts/script-2-56t5v"
+#           scriptfile="/tekton/scripts/script-0-dhmdg"
 #           touch ${scriptfile} && chmod +x ${scriptfile}
 #           cat > ${scriptfile} << '_EOF_'
-#           IyEvYmluL3NoCnNldCAtZQplY2hvIGhlbGxv
+#           IyEvYmluL3NoCnNldCAtZQplY2hvIHdzLTJjOWx2ID4gL3dvcmtzcGFjZS9jdXN0b20vZm9v
 #           _EOF_
 #           /tekton/bin/entrypoint decode-script "${scriptfile}"
-#           scriptfile="/tekton/scripts/script-6-g7qtr"
+#           scriptfile="/tekton/scripts/script-1-pz2ng"
 #           touch ${scriptfile} && chmod +x ${scriptfile}
 #           cat > ${scriptfile} << '_EOF_'
-#           IyEvYmluL3NoCnNldCAtZQplY2hvIGhlbGxv
+#           IyEvYmluL3NoCnNldCAtZQpjYXQgL3dvcmtzcGFjZS9jdXN0b20vZm9vIHwgZ3JlcCB3cy0yYzlsdg==
+#           _EOF_
+#           /tekton/bin/entrypoint decode-script "${scriptfile}"
+#           scriptfile="/tekton/scripts/script-2-dvp22"
+#           touch ${scriptfile} && chmod +x ${scriptfile}
+#           cat > ${scriptfile} << '_EOF_'
+#           IyEvYmluL3NoCnNldCAtZQplY2hvIC9mb28vYmFyL2JheiA+IC9mb28vYmFyL2Jhei9mb28=
+#           _EOF_
+#           /tekton/bin/entrypoint decode-script "${scriptfile}"
+#           scriptfile="/tekton/scripts/script-3-9dh94"
+#           touch ${scriptfile} && chmod +x ${scriptfile}
+#           cat > ${scriptfile} << '_EOF_'
+#           IyEvYmluL3NoCnNldCAtZQpjYXQgL2Zvby9iYXIvYmF6L2ZvbyB8IGdyZXAgL2Zvby9iYXIvYmF6
+#           _EOF_
+#           /tekton/bin/entrypoint decode-script "${scriptfile}"
+#           scriptfile="/tekton/scripts/script-4-jtznx"
+#           touch ${scriptfile} && chmod +x ${scriptfile}
+#           cat > ${scriptfile} << '_EOF_'
+#           IyEvYmluL3NoCnNldCAtZQplY2hvIC93b3Jrc3BhY2UvY3VzdG9tMyA+IC93b3Jrc3BhY2UvY3VzdG9tMy9mb28=
+#           _EOF_
+#           /tekton/bin/entrypoint decode-script "${scriptfile}"
+#           scriptfile="/tekton/scripts/script-5-9qw2q"
+#           touch ${scriptfile} && chmod +x ${scriptfile}
+#           cat > ${scriptfile} << '_EOF_'
+#           IyEvYmluL3NoCnNldCAtZQpjYXQgL3dvcmtzcGFjZS9jdXN0b20zL2ZvbyB8IGdyZXAgL3dvcmtzcGFjZS9jdXN0b20z
+#           _EOF_
+#           /tekton/bin/entrypoint decode-script "${scriptfile}"
+#           scriptfile="/tekton/scripts/script-6-fs5zl"
+#           touch ${scriptfile} && chmod +x ${scriptfile}
+#           cat > ${scriptfile} << '_EOF_'
+#           IyEvYmluL3NoCnNldCAtZQpjYXQgL2Jhei9iYXIvcXV1eC9teS1tZXNzYWdlLnR4dCB8IGdyZXAgImhlbGxvIHdvcmxkIg==
+#           _EOF_
+#           /tekton/bin/entrypoint decode-script "${scriptfile}"
+#           scriptfile="/tekton/scripts/script-7-8p7ql"
+#           touch ${scriptfile} && chmod +x ${scriptfile}
+#           cat > ${scriptfile} << '_EOF_'
+#           IyEvdXNyL2Jpbi9lbnYgYmFzaApzZXQgLXhlCmNhdCAvbXkvc2VjcmV0L3ZvbHVtZS91c2VybmFtZSB8IGdyZXAgInVzZXIiCmNhdCAvbXkvc2VjcmV0L3ZvbHVtZS9tZXNzYWdlIHwgZ3JlcCAiaGVsbG8gc2VjcmV0Igo=
 #           _EOF_
 #           /tekton/bin/entrypoint decode-script "${scriptfile}"
 #       command:
@@ -698,9 +822,9 @@ spec:
 #         - mountPath: /tekton/bin
 #           name: tekton-internal-bin
 #         - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
-#           name: kube-api-access-s7v4f
+#           name: kube-api-access-5dz7f
 #           readOnly: true
-#   nodeName: 192.168.137.27
+#   nodeName: 192.168.143.6
 #   preemptionPolicy: PreemptLowerPriority
 #   priority: 0
 #   restartPolicy: Never
@@ -779,7 +903,23 @@ spec:
 #       name: tekton-creds-init-home-7
 #     - emptyDir: {}
 #       name: tekton-internal-run-7
-#     - name: kube-api-access-s7v4f
+#     - name: ws-2c9lv
+#       persistentVolumeClaim:
+#         claimName: my-pvc
+#     - emptyDir: {}
+#       name: ws-tjx88
+#     - configMap:
+#         defaultMode: 420
+#         items:
+#           - key: message
+#             path: my-message.txt
+#         name: my-configmap
+#       name: ws-42hjm
+#     - name: ws-b287s
+#       secret:
+#         defaultMode: 420
+#         secretName: my-secret
+#     - name: kube-api-access-5dz7f
 #       projected:
 #         defaultMode: 420
 #         sources:

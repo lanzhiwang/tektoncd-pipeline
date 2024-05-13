@@ -21,7 +21,10 @@ spec:
               image: bash:latest
               script: |
                 #!/usr/bin/env bash
+                set -x
                 echo -n "{\"url\":\"abc.dev/sampler\",\"digest\":\"19f02276bf8dbdd62f069b922f10c65262cc34b710eea26ff928129a736be791\"}" | tee $(results.object-results.path)
+                cat $(results.object-results.path)
+                ls -al $(results.object-results.path)
       - name: task2
         params:
           - name: whole-object
@@ -42,10 +45,9 @@ spec:
           steps:
             - name: validate-object-url
               image: bash:latest
-              args: [
-                "$(params.whole-object.url)"
-              ]
+              args: ["$(params.whole-object.url)"]
               script: |
+                set -x
                 if [[ $1 != "abc.dev/sampler" ]]; then
                     echo "failed to validate the one and only argument of the script"
                     echo "Want: abc.dev/sampler, Got: $1"
@@ -57,6 +59,7 @@ spec:
               image: ubuntu
               script: |
                 #!/bin/bash
+                set -x
                 EXPECTED_url=abc.dev/sampler
                 EXPECTED_digest="19f02276bf8dbdd62f069b922f10c65262cc34b710eea26ff928129a736be791"
 
@@ -75,3 +78,34 @@ spec:
                 else
                   echo "validate the object digest successfully"
                 fi
+
+# ---
+# $ kubectl logs  pipelinerun-object-results-qnk8x-task1-pod
+# Defaulted container "step-write-object" out of: step-write-object, prepare (init), place-scripts (init)
+# + echo -n '{"url":"abc.dev/sampler","digest":"19f02276bf8dbdd62f069b922f10c65262cc34b710eea26ff928129a736be791"}'
+# + tee /tekton/results/object-results
+# {"url":"abc.dev/sampler","digest":"19f02276bf8dbdd62f069b922f10c65262cc34b710eea26ff928129a736be791"}
+
+# + cat /tekton/results/object-results
+# {"url":"abc.dev/sampler","digest":"19f02276bf8dbdd62f069b922f10c65262cc34b710eea26ff928129a736be791"}
+
+# + ls -al /tekton/results/object-results
+# -rw-r--r--    1 root     root           101 Apr 30 13:24 /tekton/results/object-results
+# $
+
+# $ kubectl logs pipelinerun-object-results-qnk8x-task2-pod -c step-validate-object-url
+# + '[[' abc.dev/sampler '!=' abc.dev/sampler ]]
+# + echo 'validate the object-url successfully'
+# validate the object-url successfully
+# $
+
+# $ kubectl logs pipelinerun-object-results-qnk8x-task2-pod -c step-validate-whole-object
+# + EXPECTED_url=abc.dev/sampler
+# + EXPECTED_digest=19f02276bf8dbdd62f069b922f10c65262cc34b710eea26ff928129a736be791
+# + [[ abc.dev/sampler != abc.dev/sampler ]]
+# + echo 'validate the object url successfully'
+# validate the object url successfully
+# + [[ 19f02276bf8dbdd62f069b922f10c65262cc34b710eea26ff928129a736be791 != 19f02276bf8dbdd62f069b922f10c65262cc34b710eea26ff928129a736be791 ]]
+# + echo 'validate the object digest successfully'
+# validate the object digest successfully
+# $

@@ -16,57 +16,6 @@ spec:
         tree -a /tekton
         tree -a /workspace
 
-# + echo 'Hello World'
-# Hello World
-
-# + pwd
-# /
-
-# + env
-# KUBERNETES_PORT=tcp://10.4.0.1:443
-# KUBERNETES_SERVICE_PORT=443
-# HOSTNAME=hello-task-run-pod
-# SHLVL=1
-# HOME=/root
-# KUBERNETES_PORT_443_TCP_ADDR=10.4.0.1
-# PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-# KUBERNETES_PORT_443_TCP_PORT=443
-# KUBERNETES_PORT_443_TCP_PROTO=tcp
-# KUBERNETES_PORT_443_TCP=tcp://10.4.0.1:443
-# KUBERNETES_SERVICE_PORT_HTTPS=443
-# KUBERNETES_SERVICE_HOST=10.4.0.1
-# PWD=/
-
-# + tree -a /tekton
-# /tekton
-# ├── bin
-# │   └── entrypoint
-# ├── creds
-# ├── downward
-# │   ├── ..2024_04_30_07_16_32.2193078238
-# │   │   └── ready
-# │   ├── ..data -> ..2024_04_30_07_16_32.2193078238
-# │   └── ready -> ..data/ready
-# ├── home
-# ├── results
-# ├── run
-# │   └── 0
-# │       └── status
-# │           └── results
-# ├── scripts
-# │   └── script-0-fnjq9
-# ├── steps
-# │   ├── 0 -> /tekton/run/0/status
-# │   └── step-echo -> /tekton/run/0/status
-# └── termination
-
-# 16 directories, 5 files
-
-# + tree -a /workspace
-# /workspace
-
-# 0 directories, 0 files
-
 # ---
 # apiVersion: v1
 # kind: Pod
@@ -76,7 +25,6 @@ spec:
 #       {"apiVersion":"tekton.dev/v1beta1","kind":"TaskRun","metadata":{"annotations":{},"name":"hello-task-run","namespace":"default"},"spec":{"taskRef":{"name":"hello"}}}
 #     pipeline.tekton.dev/release: d714545
 #     tekton.dev/ready: READY
-#   creationTimestamp: "2024-04-30T01:59:36Z"
 #   labels:
 #     app.kubernetes.io/managed-by: tekton-pipelines
 #     tekton.dev/task: hello
@@ -90,8 +38,6 @@ spec:
 #       kind: TaskRun
 #       name: hello-task-run
 #       uid: 088ac82c-77cd-4e29-b61a-1db8d898fcf6
-#   resourceVersion: "403082"
-#   uid: 12929712-982a-4561-9f33-55ce4298b512
 # spec:
 #   activeDeadlineSeconds: 5400
 #   containers:
@@ -253,77 +199,55 @@ spec:
 #                     apiVersion: v1
 #                     fieldPath: metadata.namespace
 #                   path: namespace
-# status:
-#   conditions:
-#     - lastProbeTime: null
-#       lastTransitionTime: "2024-04-30T02:02:48Z"
-#       reason: PodCompleted
-#       status: "True"
-#       type: Initialized
-#     - lastProbeTime: null
-#       lastTransitionTime: "2024-04-30T02:02:59Z"
-#       reason: PodCompleted
-#       status: "False"
-#       type: Ready
-#     - lastProbeTime: null
-#       lastTransitionTime: "2024-04-30T02:02:59Z"
-#       reason: PodCompleted
-#       status: "False"
-#       type: ContainersReady
-#     - lastProbeTime: null
-#       lastTransitionTime: "2024-04-30T01:59:37Z"
-#       status: "True"
-#       type: PodScheduled
-#   containerStatuses:
-#     - containerID: containerd://a275684bd20a3f4c0a05a8d6faf8196c10a673317af97d6e1c4f83cfbe53b9cb
-#       image: docker.io/library/alpine:latest
-#       imageID: docker.io/library/alpine@sha256:c5b1261d6d3e43071626931fc004f70149baeba2c8ec672bd4f27761f8e1ad6b
-#       lastState: {}
-#       name: step-echo
-#       ready: false
-#       restartCount: 0
-#       started: false
-#       state:
-#         terminated:
-#           containerID: containerd://a275684bd20a3f4c0a05a8d6faf8196c10a673317af97d6e1c4f83cfbe53b9cb
-#           exitCode: 0
-#           finishedAt: "2024-04-30T02:02:58Z"
-#           message: '[{"key":"StartedAt","value":"2024-04-30T02:02:58.361Z","type":3}]'
-#           reason: Completed
-#           startedAt: "2024-04-30T02:02:56Z"
-#   hostIP: 192.168.137.27
-#   initContainerStatuses:
-#     - containerID: containerd://8342a9b9826c1a45cbd8e0b62c8b478706f6a5d330d3a4fe7e644232e64ffa6f
-#       image: ghcr.io/lanzhiwang/tekton-releases/tektoncd/pipeline/cmd/entrypoint:v0.57.0
-#       imageID: ghcr.io/lanzhiwang/tekton-releases/tektoncd/pipeline/cmd/entrypoint@sha256:2aedd9b42d8ba49bf88de4bb6e789088ce3f6ac34cd8303dad18c2608e8f4008
-#       lastState: {}
-#       name: prepare
-#       ready: true
-#       restartCount: 0
-#       state:
-#         terminated:
-#           containerID: containerd://8342a9b9826c1a45cbd8e0b62c8b478706f6a5d330d3a4fe7e644232e64ffa6f
-#           exitCode: 0
-#           finishedAt: "2024-04-30T02:00:34Z"
-#           reason: Completed
-#           startedAt: "2024-04-30T02:00:33Z"
-#     - containerID: containerd://a0c85d2a339cb6eb70f7efa27904928530c4aa5af5049b7ac5feb8a030ce8716
-#       image: ghcr.io/lanzhiwang/chainguard/busybox:v1.0.0
-#       imageID: ghcr.io/lanzhiwang/chainguard/busybox@sha256:48604a9f16721131879bbbbb05f28df84f82d3a83ff11fe523a293f485cd3591
-#       lastState: {}
-#       name: place-scripts
-#       ready: true
-#       restartCount: 0
-#       state:
-#         terminated:
-#           containerID: containerd://a0c85d2a339cb6eb70f7efa27904928530c4aa5af5049b7ac5feb8a030ce8716
-#           exitCode: 0
-#           finishedAt: "2024-04-30T02:02:47Z"
-#           reason: Completed
-#           startedAt: "2024-04-30T02:02:47Z"
-#   phase: Succeeded
-#   podIP: 10.3.0.103
-#   podIPs:
-#     - ip: 10.3.0.103
-#   qosClass: BestEffort
-#   startTime: "2024-04-30T01:59:37Z"
+
+# + echo 'Hello World'
+# Hello World
+
+# + pwd
+# /
+
+# + env
+# KUBERNETES_PORT=tcp://10.4.0.1:443
+# KUBERNETES_SERVICE_PORT=443
+# HOSTNAME=hello-task-run-pod
+# SHLVL=1
+# HOME=/root
+# KUBERNETES_PORT_443_TCP_ADDR=10.4.0.1
+# PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+# KUBERNETES_PORT_443_TCP_PORT=443
+# KUBERNETES_PORT_443_TCP_PROTO=tcp
+# KUBERNETES_PORT_443_TCP=tcp://10.4.0.1:443
+# KUBERNETES_SERVICE_PORT_HTTPS=443
+# KUBERNETES_SERVICE_HOST=10.4.0.1
+# PWD=/
+
+# + tree -a /tekton
+# /tekton
+# ├── bin
+# │   └── entrypoint
+# ├── creds
+# ├── downward
+# │   ├── ..2024_04_30_07_16_32.2193078238
+# │   │   └── ready
+# │   ├── ..data -> ..2024_04_30_07_16_32.2193078238
+# │   └── ready -> ..data/ready
+# ├── home
+# ├── results
+# ├── run
+# │   └── 0
+# │       └── status
+# │           └── results
+# ├── scripts
+# │   └── script-0-fnjq9
+# ├── steps
+# │   ├── 0 -> /tekton/run/0/status
+# │   └── step-echo -> /tekton/run/0/status
+# └── termination
+
+# 16 directories, 5 files
+
+# + tree -a /workspace
+# /workspace
+
+# 0 directories, 0 files
+

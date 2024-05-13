@@ -90,7 +90,7 @@ spec:
       serviceAccountName: tekton-chains-controller
       containers:
         - name: tekton-chains-controller
-          image: gcr.io/tekton-releases/github.com/tektoncd/chains/cmd/controller:v0.20.1@sha256:3c77630253ba829c781b75dd77de0450a09ea9a38f52ebd497ffd4ba0d28d134
+          image: ghcr.io/lanzhiwang/tekton-releases/tektoncd/chains/cmd/controller:v0.20.1
           volumeMounts:
             - name: signing-secrets
               mountPath: /etc/signing-secrets
@@ -180,13 +180,33 @@ rules:
     # Controller needs cluster access to all of the CRDs that it is responsible for
     # managing.
   - apiGroups: ["tekton.dev"]
-    resources: ["tasks", "clustertasks", "taskruns", "pipelines", "pipelineruns", "pipelineresources", "conditions", "runs"]
+    resources:
+      [
+        "tasks",
+        "clustertasks",
+        "taskruns",
+        "pipelines",
+        "pipelineruns",
+        "pipelineresources",
+        "conditions",
+        "runs",
+      ]
     verbs: ["get", "list", "create", "update", "delete", "patch", "watch"]
   - apiGroups: ["tekton.dev"]
-    resources: ["taskruns/finalizers", "pipelineruns/finalizers", "runs/finalizers"]
+    resources:
+      ["taskruns/finalizers", "pipelineruns/finalizers", "runs/finalizers"]
     verbs: ["get", "list", "create", "update", "delete", "patch", "watch"]
   - apiGroups: ["tekton.dev"]
-    resources: ["tasks/status", "clustertasks/status", "taskruns/status", "pipelines/status", "pipelineruns/status", "pipelineresources/status", "runs/status"]
+    resources:
+      [
+        "tasks/status",
+        "clustertasks/status",
+        "taskruns/status",
+        "pipelines/status",
+        "pipelineruns/status",
+        "pipelineresources/status",
+        "runs/status",
+      ]
     verbs: ["get", "list", "create", "update", "delete", "patch", "watch"]
 ---
 kind: ClusterRole
@@ -548,3 +568,4 @@ spec:
     app.kubernetes.io/part-of: tekton-chains
 
 ---
+

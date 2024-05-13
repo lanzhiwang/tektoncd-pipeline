@@ -8,10 +8,26 @@ spec:
   taskSpec:
     steps:
       - image: ubuntu
-        script: exit 0
+        script: |
+          #!/usr/bin/env bash
+          set -x
+          echo "hello world"
+          exit 0
       - image: ubuntu
         script: |
           set +e # dont fail the script on error
+          set -x
+
+          apt-get update
+          apt-get install -y tree
+          tree -a /tekton
+          tree -a /workspace
+
+          cat /tekton/run/0/out
+
+          cat /tekton/run/0/status/exitCode
+
+          ls -al /tekton/run/0/status/results
 
           # Steps should not be able to write to other step's run directories.
           echo "hello world" > /tekton/run/0/out
@@ -29,3 +45,104 @@ spec:
             echo "able to write to run directory of non-current step"
             exit 1
           fi
+
+# $ kubectl logs readonly-internal-dir-hw98r-pod -c step-unnamed-0
+# + echo 'hello world'
+# hello world
+# + exit 0
+# $
+
+# $ kubectl logs readonly-internal-dir-hw98r-pod -c step-unnamed-1
+
+# + apt-get update
+# Get:1 http://security.ubuntu.com/ubuntu noble-security InRelease [89.7 kB]
+# Get:2 http://archive.ubuntu.com/ubuntu noble InRelease [256 kB]
+# Get:3 http://security.ubuntu.com/ubuntu noble-security/universe amd64 Packages [11.8 kB]
+# Get:4 http://security.ubuntu.com/ubuntu noble-security/main amd64 Packages [31.0 kB]
+# Get:5 http://archive.ubuntu.com/ubuntu noble-updates InRelease [89.7 kB]
+# Get:6 http://archive.ubuntu.com/ubuntu noble-backports InRelease [89.7 kB]
+# Get:7 http://archive.ubuntu.com/ubuntu noble/restricted amd64 Packages [117 kB]
+# Get:8 http://archive.ubuntu.com/ubuntu noble/universe amd64 Packages [19.3 MB]
+# Get:9 http://archive.ubuntu.com/ubuntu noble/main amd64 Packages [1808 kB]
+# Get:10 http://archive.ubuntu.com/ubuntu noble/multiverse amd64 Packages [331 kB]
+# Get:11 http://archive.ubuntu.com/ubuntu noble-updates/universe amd64 Packages [20.1 kB]
+# Get:12 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages [33.0 kB]
+# Get:13 http://archive.ubuntu.com/ubuntu noble-backports/universe amd64 Packages [4224 B]
+# Fetched 22.2 MB in 12s (1843 kB/s)
+# Reading package lists...
+
+# + apt-get install -y tree
+# Reading package lists...
+# Building dependency tree...
+# Reading state information...
+# The following NEW packages will be installed:
+#   tree
+# 0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded.
+# Need to get 47.1 kB of archives.
+# After this operation, 111 kB of additional disk space will be used.
+# Get:1 http://archive.ubuntu.com/ubuntu noble/universe amd64 tree amd64 2.1.1-2ubuntu3 [47.1 kB]
+# debconf: delaying package configuration, since apt-utils is not installed
+# Fetched 47.1 kB in 1s (49.5 kB/s)
+# Selecting previously unselected package tree.
+# (Reading database ... 4368 files and directories currently installed.)
+# Preparing to unpack .../tree_2.1.1-2ubuntu3_amd64.deb ...
+# Unpacking tree (2.1.1-2ubuntu3) ...
+# Setting up tree (2.1.1-2ubuntu3) ...
+
+# + tree -a /tekton
+# /tekton
+# |-- bin
+# |   `-- entrypoint
+# |-- creds
+# |-- home
+# |-- results
+# |-- run
+# |   |-- 0
+# |   |   |-- out
+# |   |   `-- status
+# |   |       |-- exitCode
+# |   |       `-- results
+# |   |-- 1
+# |   |   `-- status
+# |   |       `-- results
+# |   `-- 2
+# |       `-- status
+# |           `-- results
+# |-- scripts
+# |   |-- script-0-99srh
+# |   |-- script-1-xqpfh
+# |   `-- script-2-t8hb4
+# |-- steps
+# |   |-- 0 -> /tekton/run/0/status
+# |   |-- 1 -> /tekton/run/1/status
+# |   |-- 2 -> /tekton/run/2/status
+# |   |-- step-unnamed-0 -> /tekton/run/0/status
+# |   |-- step-unnamed-1 -> /tekton/run/1/status
+# |   `-- step-unnamed-2 -> /tekton/run/2/status
+# `-- termination
+
+# 23 directories, 7 files
+
+# + tree -a /workspace
+# /workspace
+
+# 0 directories, 0 files
+
+# + cat /tekton/run/0/out
+
+# + cat /tekton/run/0/status/exitCode
+# 0
+
+# + ls -al /tekton/run/0/status/results
+# total 0
+# drwxr-xr-x 2 root root  6 May 13 13:13 .
+# drwxr-xr-x 3 root root 37 May 13 13:13 ..
+
+# + [ 2 -eq 0 ]
+# /tekton/scripts/script-1-xqpfh: 18: cannot create /tekton/run/0/out: Read-only file system
+
+# $
+
+# $ kubectl logs readonly-internal-dir-hw98r-pod -c step-unnamed-2
+# /tekton/scripts/script-2-t8hb4: 6: cannot create /tekton/steps/0/exitCode: Read-only file system
+# $

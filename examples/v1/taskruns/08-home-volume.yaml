@@ -15,6 +15,7 @@ spec:
         image: ubuntu
         # /tekton/home/stuff *doesn't* exist, because the specified volumeMount
         # conflicts with it, and the user's explicit declaration wins the tie.
+        # /tekton/home/stuff *不*存在，因为指定的volumeMount与其冲突，并且用户的显式声明赢得了平局。
         script: |
           #!/usr/bin/env bash
           [[ ! -f /tekton/home/stuff ]]
@@ -31,7 +32,6 @@ spec:
 #   annotations:
 #     pipeline.tekton.dev/release: d714545
 #     tekton.dev/ready: READY
-#   creationTimestamp: "2024-04-30T08:10:18Z"
 #   labels:
 #     app.kubernetes.io/managed-by: tekton-pipelines
 #     tekton.dev/taskRun: home-volume-sjftg
@@ -44,8 +44,6 @@ spec:
 #       kind: TaskRun
 #       name: home-volume-sjftg
 #       uid: ab47b708-2e78-4c94-8760-20d7d0db11a6
-#   resourceVersion: "575220"
-#   uid: 892ae52f-c3e0-4d54-9d58-ee82245a6ab9
 # spec:
 #   activeDeadlineSeconds: 5400
 #   containers:
