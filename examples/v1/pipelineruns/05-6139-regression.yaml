@@ -6,20 +6,20 @@ spec:
   pipelineSpec:
     params:
       - name: say-hello
-        default: 'false'
+        default: "false"
       - name: do-shutdown
-        default: 'false'
+        default: "false"
     tasks:
       - name: hello
         taskSpec:
           results:
             - name: result-one
           steps:
-          - image: alpine
-            script: |
-              #!/bin/sh
-              echo "Hello world!"
-              echo -n "RES1" > $(results.result-one.path)
+            - image: alpine
+              script: |
+                #!/bin/sh
+                echo "Hello world!"
+                echo -n "RES1" > $(results.result-one.path)
 
       - name: goodbye
         runAfter:
@@ -28,11 +28,11 @@ spec:
           results:
             - name: result-two
           steps:
-          - image: alpine
-            script: |
-              #!/bin/sh
-              echo "Goodbye world!"
-              echo -n "RES2" > $(results.result-two.path)
+            - image: alpine
+              script: |
+                #!/bin/sh
+                echo "Goodbye world!"
+                echo -n "RES2" > $(results.result-two.path)
         when:
           - input: $(params.say-hello)
             operator: in
@@ -43,11 +43,11 @@ spec:
           results:
             - name: result-three
           steps:
-          - image: alpine
-            script: |
-              #!/bin/sh
-              echo "Shutdown world!"
-              echo -n "RES3" > $(results.result-three.path)
+            - image: alpine
+              script: |
+                #!/bin/sh
+                echo "Shutdown world!"
+                echo -n "RES3" > $(results.result-three.path)
         when:
           - input: $(params.do-shutdown)
             operator: in
@@ -55,10 +55,10 @@ spec:
     results:
       - name: result-hello
         description: Result one
-        value: '$(tasks.hello.results.result-one)'
+        value: "$(tasks.hello.results.result-one)"
       - name: result-goodbye
         description: Result two
-        value: '$(tasks.goodbye.results.result-two)'
+        value: "$(tasks.goodbye.results.result-two)"
       - name: result-shutdown
         description: Result shutdown
-        value: '$(finally.shutdown.results.result-three)'
+        value: "$(finally.shutdown.results.result-three)"

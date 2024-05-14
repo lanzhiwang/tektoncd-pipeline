@@ -4,7 +4,7 @@ metadata:
   generateName: pipelinerun-with-failing-step-
 spec:
   taskRunTemplate:
-    serviceAccountName: 'default'
+    serviceAccountName: "default"
   params:
     - name: CONTINUE
       value: "continue"
@@ -18,7 +18,7 @@ spec:
             value: "$(params.CONTINUE)"
         taskSpec:
           params:
-          - name: CONTINUE
+            - name: CONTINUE
           steps:
             # not really doing anything here, just a hurdle to test the "ignore step error"
             - image: alpine
@@ -68,7 +68,6 @@ spec:
               script: |
                 exit 20
 ---
-
 apiVersion: tekton.dev/v1
 kind: PipelineRun
 metadata:
