@@ -7,21 +7,665 @@ spec:
     steps:
       - name: write
         image: ubuntu
-        script: echo some stuff > /workspace/stuff
+        script: |
+          #!/usr/bin/env bash
+          pwd
+          env
+          apt-get update
+          apt-get install -y tree
+          tree -a /tekton
+          tree -a /workspace
+          echo some stuff > /workspace/stuff
+          tree -a /tekton
+          tree -a /workspace
+
       - name: read
         image: ubuntu
-        script: cat /workspace/stuff
+        script: |
+          #!/usr/bin/env bash
+          pwd
+          env
+          apt-get update
+          apt-get install -y tree
+          tree -a /tekton
+          tree -a /workspace
+          cat /workspace/stuff
 
       - name: override-workspace
         image: ubuntu
         # /workspace/stuff *doesn't* exist.
         script: |
           #!/usr/bin/env bash
+          pwd
+          env
+          apt-get update
+          apt-get install -y tree
+          tree -a /tekton
+          tree -a /workspace
           [[ ! -f /workspace/stuff ]]
         volumeMounts:
           - name: empty
             mountPath: /workspace
-
     volumes:
       - name: empty
         emptyDir: {}
+# ---
+# apiVersion: v1
+# kind: Pod
+# metadata:
+#   annotations:
+#     pipeline.tekton.dev/release: d714545
+#     tekton.dev/ready: READY
+#   labels:
+#     app.kubernetes.io/managed-by: tekton-pipelines
+#     tekton.dev/taskRun: workspace-volume-5gzq7
+#   name: workspace-volume-5gzq7-pod
+#   namespace: default
+#   ownerReferences:
+#     - apiVersion: tekton.dev/v1
+#       blockOwnerDeletion: true
+#       controller: true
+#       kind: TaskRun
+#       name: workspace-volume-5gzq7
+#       uid: 4c3abee3-216a-4dbf-8712-d5f919e138ef
+# spec:
+#   activeDeadlineSeconds: 5400
+#   containers:
+#     - args:
+#         - -wait_file
+#         - /tekton/downward/ready
+#         - -wait_file_content
+#         - -post_file
+#         - /tekton/run/0/out
+#         - -termination_path
+#         - /tekton/termination
+#         - -step_metadata_dir
+#         - /tekton/run/0/status
+#         - -entrypoint
+#         - /tekton/scripts/script-0-q9gkj
+#         - --
+#       command:
+#         - /tekton/bin/entrypoint
+#       image: ubuntu
+#       imagePullPolicy: Always
+#       name: step-write
+#       resources: {}
+#       terminationMessagePath: /tekton/termination
+#       terminationMessagePolicy: File
+#       volumeMounts:
+#         - mountPath: /tekton/scripts
+#           name: tekton-internal-scripts
+#           readOnly: true
+#         - mountPath: /tekton/downward
+#           name: tekton-internal-downward
+#           readOnly: true
+#         - mountPath: /tekton/creds
+#           name: tekton-creds-init-home-0
+#         - mountPath: /tekton/run/0
+#           name: tekton-internal-run-0
+#         - mountPath: /tekton/run/1
+#           name: tekton-internal-run-1
+#           readOnly: true
+#         - mountPath: /tekton/run/2
+#           name: tekton-internal-run-2
+#           readOnly: true
+#         - mountPath: /tekton/bin
+#           name: tekton-internal-bin
+#           readOnly: true
+#         - mountPath: /workspace
+#           name: tekton-internal-workspace
+#         - mountPath: /tekton/home
+#           name: tekton-internal-home
+#         - mountPath: /tekton/results
+#           name: tekton-internal-results
+#         - mountPath: /tekton/steps
+#           name: tekton-internal-steps
+#           readOnly: true
+#         - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+#           name: kube-api-access-djll5
+#           readOnly: true
+#     - args:
+#         - -wait_file
+#         - /tekton/run/0/out
+#         - -post_file
+#         - /tekton/run/1/out
+#         - -termination_path
+#         - /tekton/termination
+#         - -step_metadata_dir
+#         - /tekton/run/1/status
+#         - -entrypoint
+#         - /tekton/scripts/script-1-s8d72
+#         - --
+#       command:
+#         - /tekton/bin/entrypoint
+#       image: ubuntu
+#       imagePullPolicy: Always
+#       name: step-read
+#       resources: {}
+#       terminationMessagePath: /tekton/termination
+#       terminationMessagePolicy: File
+#       volumeMounts:
+#         - mountPath: /tekton/scripts
+#           name: tekton-internal-scripts
+#           readOnly: true
+#         - mountPath: /tekton/creds
+#           name: tekton-creds-init-home-1
+#         - mountPath: /tekton/run/0
+#           name: tekton-internal-run-0
+#           readOnly: true
+#         - mountPath: /tekton/run/1
+#           name: tekton-internal-run-1
+#         - mountPath: /tekton/run/2
+#           name: tekton-internal-run-2
+#           readOnly: true
+#         - mountPath: /tekton/bin
+#           name: tekton-internal-bin
+#           readOnly: true
+#         - mountPath: /workspace
+#           name: tekton-internal-workspace
+#         - mountPath: /tekton/home
+#           name: tekton-internal-home
+#         - mountPath: /tekton/results
+#           name: tekton-internal-results
+#         - mountPath: /tekton/steps
+#           name: tekton-internal-steps
+#           readOnly: true
+#         - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+#           name: kube-api-access-djll5
+#           readOnly: true
+#     - args:
+#         - -wait_file
+#         - /tekton/run/1/out
+#         - -post_file
+#         - /tekton/run/2/out
+#         - -termination_path
+#         - /tekton/termination
+#         - -step_metadata_dir
+#         - /tekton/run/2/status
+#         - -entrypoint
+#         - /tekton/scripts/script-2-cgv8h
+#         - --
+#       command:
+#         - /tekton/bin/entrypoint
+#       image: ubuntu
+#       imagePullPolicy: Always
+#       name: step-override-workspace
+#       resources: {}
+#       terminationMessagePath: /tekton/termination
+#       terminationMessagePolicy: File
+#       volumeMounts:
+#         - mountPath: /workspace
+#           name: empty
+#         - mountPath: /tekton/scripts
+#           name: tekton-internal-scripts
+#           readOnly: true
+#         - mountPath: /tekton/creds
+#           name: tekton-creds-init-home-2
+#         - mountPath: /tekton/run/0
+#           name: tekton-internal-run-0
+#           readOnly: true
+#         - mountPath: /tekton/run/1
+#           name: tekton-internal-run-1
+#           readOnly: true
+#         - mountPath: /tekton/run/2
+#           name: tekton-internal-run-2
+#         - mountPath: /tekton/bin
+#           name: tekton-internal-bin
+#           readOnly: true
+#         - mountPath: /tekton/home
+#           name: tekton-internal-home
+#         - mountPath: /tekton/results
+#           name: tekton-internal-results
+#         - mountPath: /tekton/steps
+#           name: tekton-internal-steps
+#           readOnly: true
+#         - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+#           name: kube-api-access-djll5
+#           readOnly: true
+#   dnsPolicy: ClusterFirst
+#   enableServiceLinks: true
+#   initContainers:
+#     - command:
+#         - /ko-app/entrypoint
+#         - init
+#         - /ko-app/entrypoint
+#         - /tekton/bin/entrypoint
+#         - step-write
+#         - step-read
+#         - step-override-workspace
+#       image: ghcr.io/lanzhiwang/tekton-releases/tektoncd/pipeline/cmd/entrypoint:v0.57.0
+#       imagePullPolicy: IfNotPresent
+#       name: prepare
+#       resources: {}
+#       terminationMessagePath: /dev/termination-log
+#       terminationMessagePolicy: File
+#       volumeMounts:
+#         - mountPath: /tekton/bin
+#           name: tekton-internal-bin
+#         - mountPath: /tekton/steps
+#           name: tekton-internal-steps
+#         - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+#           name: kube-api-access-djll5
+#           readOnly: true
+#       workingDir: /
+#     - args:
+#         - -c
+#         - |
+#           scriptfile="/tekton/scripts/script-0-q9gkj"
+#           touch ${scriptfile} && chmod +x ${scriptfile}
+#           cat > ${scriptfile} << '_EOF_'
+#           IyEvdXNyL2Jpbi9lbnYgYmFzaApwd2QKZW52CmFwdC1nZXQgdXBkYXRlCmFwdC1nZXQgaW5zdGFsbCAteSB0cmVlCnRyZWUgLWEgL3Rla3Rvbgp0cmVlIC1hIC93b3Jrc3BhY2UKZWNobyBzb21lIHN0dWZmID4gL3dvcmtzcGFjZS9zdHVmZgp0cmVlIC1hIC90ZWt0b24KdHJlZSAtYSAvd29ya3NwYWNlCg==
+#           _EOF_
+#           /tekton/bin/entrypoint decode-script "${scriptfile}"
+#           scriptfile="/tekton/scripts/script-1-s8d72"
+#           touch ${scriptfile} && chmod +x ${scriptfile}
+#           cat > ${scriptfile} << '_EOF_'
+#           IyEvdXNyL2Jpbi9lbnYgYmFzaApwd2QKZW52CmFwdC1nZXQgdXBkYXRlCmFwdC1nZXQgaW5zdGFsbCAteSB0cmVlCnRyZWUgLWEgL3Rla3Rvbgp0cmVlIC1hIC93b3Jrc3BhY2UKY2F0IC93b3Jrc3BhY2Uvc3R1ZmYK
+#           _EOF_
+#           /tekton/bin/entrypoint decode-script "${scriptfile}"
+#           scriptfile="/tekton/scripts/script-2-cgv8h"
+#           touch ${scriptfile} && chmod +x ${scriptfile}
+#           cat > ${scriptfile} << '_EOF_'
+#           IyEvdXNyL2Jpbi9lbnYgYmFzaApwd2QKZW52CmFwdC1nZXQgdXBkYXRlCmFwdC1nZXQgaW5zdGFsbCAteSB0cmVlCnRyZWUgLWEgL3Rla3Rvbgp0cmVlIC1hIC93b3Jrc3BhY2UKW1sgISAtZiAvd29ya3NwYWNlL3N0dWZmIF1dCg==
+#           _EOF_
+#           /tekton/bin/entrypoint decode-script "${scriptfile}"
+#       command:
+#         - sh
+#       image: ghcr.io/lanzhiwang/chainguard/busybox:v1.0.0
+#       imagePullPolicy: IfNotPresent
+#       name: place-scripts
+#       resources: {}
+#       terminationMessagePath: /dev/termination-log
+#       terminationMessagePolicy: File
+#       volumeMounts:
+#         - mountPath: /tekton/scripts
+#           name: tekton-internal-scripts
+#         - mountPath: /tekton/bin
+#           name: tekton-internal-bin
+#         - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+#           name: kube-api-access-djll5
+#           readOnly: true
+#   nodeName: 192.168.138.249
+#   preemptionPolicy: PreemptLowerPriority
+#   priority: 0
+#   restartPolicy: Never
+#   schedulerName: default-scheduler
+#   securityContext: {}
+#   serviceAccount: default
+#   serviceAccountName: default
+#   terminationGracePeriodSeconds: 30
+#   tolerations:
+#     - effect: NoExecute
+#       key: node.kubernetes.io/not-ready
+#       operator: Exists
+#       tolerationSeconds: 30
+#     - effect: NoExecute
+#       key: node.kubernetes.io/unreachable
+#       operator: Exists
+#       tolerationSeconds: 30
+#   volumes:
+#     - emptyDir: {}
+#       name: tekton-internal-workspace
+#     - emptyDir: {}
+#       name: tekton-internal-home
+#     - emptyDir: {}
+#       name: tekton-internal-results
+#     - emptyDir: {}
+#       name: tekton-internal-steps
+#     - emptyDir: {}
+#       name: tekton-internal-scripts
+#     - emptyDir: {}
+#       name: tekton-internal-bin
+#     - downwardAPI:
+#         defaultMode: 420
+#         items:
+#           - fieldRef:
+#               apiVersion: v1
+#               fieldPath: metadata.annotations['tekton.dev/ready']
+#             path: ready
+#       name: tekton-internal-downward
+#     - emptyDir:
+#         medium: Memory
+#       name: tekton-creds-init-home-0
+#     - emptyDir: {}
+#       name: tekton-internal-run-0
+#     - emptyDir:
+#         medium: Memory
+#       name: tekton-creds-init-home-1
+#     - emptyDir: {}
+#       name: tekton-internal-run-1
+#     - emptyDir:
+#         medium: Memory
+#       name: tekton-creds-init-home-2
+#     - emptyDir: {}
+#       name: tekton-internal-run-2
+#     - emptyDir: {}
+#       name: empty
+#     - name: kube-api-access-djll5
+#       projected:
+#         defaultMode: 420
+#         sources:
+#           - serviceAccountToken:
+#               expirationSeconds: 3607
+#               path: token
+#           - configMap:
+#               items:
+#                 - key: ca.crt
+#                   path: ca.crt
+#               name: kube-root-ca.crt
+#           - downwardAPI:
+#               items:
+#                 - fieldRef:
+#                     apiVersion: v1
+#                     fieldPath: metadata.namespace
+#                   path: namespace
+
+# $ kubectl logs workspace-volume-5gzq7-pod -c step-write
+
+# /
+
+# KUBERNETES_SERVICE_PORT_HTTPS=443
+# KUBERNETES_SERVICE_PORT=443
+# HOSTNAME=workspace-volume-5gzq7-pod
+# PWD=/
+# HOME=/root
+# KUBERNETES_PORT_443_TCP=tcp://10.4.0.1:443
+# SHLVL=1
+# KUBERNETES_PORT_443_TCP_PROTO=tcp
+# KUBERNETES_PORT_443_TCP_ADDR=10.4.0.1
+# KUBERNETES_SERVICE_HOST=10.4.0.1
+# KUBERNETES_PORT=tcp://10.4.0.1:443
+# KUBERNETES_PORT_443_TCP_PORT=443
+# PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+# _=/usr/bin/env
+
+# Get:1 http://security.ubuntu.com/ubuntu noble-security InRelease [89.7 kB]
+# Get:2 http://archive.ubuntu.com/ubuntu noble InRelease [256 kB]
+# Get:3 http://security.ubuntu.com/ubuntu noble-security/universe amd64 Packages [12.1 kB]
+# Get:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease [89.7 kB]
+# Get:5 http://security.ubuntu.com/ubuntu noble-security/main amd64 Packages [31.6 kB]
+# Get:6 http://archive.ubuntu.com/ubuntu noble-backports InRelease [89.7 kB]
+# Get:7 http://archive.ubuntu.com/ubuntu noble/main amd64 Packages [1808 kB]
+# Get:8 http://archive.ubuntu.com/ubuntu noble/restricted amd64 Packages [117 kB]
+# Get:9 http://archive.ubuntu.com/ubuntu noble/multiverse amd64 Packages [331 kB]
+# Get:10 http://archive.ubuntu.com/ubuntu noble/universe amd64 Packages [19.3 MB]
+# Get:11 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages [33.7 kB]
+# Get:12 http://archive.ubuntu.com/ubuntu noble-updates/universe amd64 Packages [20.5 kB]
+# Get:13 http://archive.ubuntu.com/ubuntu noble-backports/universe amd64 Packages [4224 B]
+# Fetched 22.2 MB in 17s (1299 kB/s)
+# Reading package lists...
+# Reading package lists...
+# Building dependency tree...
+# Reading state information...
+# The following NEW packages will be installed:
+#   tree
+# 0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded.
+# Need to get 47.1 kB of archives.
+# After this operation, 111 kB of additional disk space will be used.
+# Get:1 http://archive.ubuntu.com/ubuntu noble/universe amd64 tree amd64 2.1.1-2ubuntu3 [47.1 kB]
+# debconf: delaying package configuration, since apt-utils is not installed
+# Fetched 47.1 kB in 1s (40.9 kB/s)
+# Selecting previously unselected package tree.
+# (Reading database ... 4368 files and directories currently installed.)
+# Preparing to unpack .../tree_2.1.1-2ubuntu3_amd64.deb ...
+# Unpacking tree (2.1.1-2ubuntu3) ...
+# Setting up tree (2.1.1-2ubuntu3) ...
+
+# /tekton
+# |-- bin
+# |   `-- entrypoint
+# |-- creds
+# |-- downward
+# |   |-- ..2024_05_14_06_15_58.3858725736
+# |   |   `-- ready
+# |   |-- ..data -> ..2024_05_14_06_15_58.3858725736
+# |   `-- ready -> ..data/ready
+# |-- home
+# |-- results
+# |-- run
+# |   |-- 0
+# |   |   `-- status
+# |   |       `-- results
+# |   |-- 1
+# |   |   `-- status
+# |   |       `-- results
+# |   `-- 2
+# |       `-- status
+# |           `-- results
+# |-- scripts
+# |   |-- script-0-q9gkj
+# |   |-- script-1-s8d72
+# |   `-- script-2-cgv8h
+# |-- steps
+# |   |-- 0 -> /tekton/run/0/status
+# |   |-- 1 -> /tekton/run/1/status
+# |   |-- 2 -> /tekton/run/2/status
+# |   |-- step-override-workspace -> /tekton/run/2/status
+# |   |-- step-read -> /tekton/run/1/status
+# |   `-- step-write -> /tekton/run/0/status
+# `-- termination
+
+# 26 directories, 7 files
+
+# /workspace
+
+# 0 directories, 0 files
+
+# /tekton
+# |-- bin
+# |   `-- entrypoint
+# |-- creds
+# |-- downward
+# |   |-- ..2024_05_14_06_15_58.3858725736
+# |   |   `-- ready
+# |   |-- ..data -> ..2024_05_14_06_15_58.3858725736
+# |   `-- ready -> ..data/ready
+# |-- home
+# |-- results
+# |-- run
+# |   |-- 0
+# |   |   `-- status
+# |   |       `-- results
+# |   |-- 1
+# |   |   `-- status
+# |   |       `-- results
+# |   `-- 2
+# |       `-- status
+# |           `-- results
+# |-- scripts
+# |   |-- script-0-q9gkj
+# |   |-- script-1-s8d72
+# |   `-- script-2-cgv8h
+# |-- steps
+# |   |-- 0 -> /tekton/run/0/status
+# |   |-- 1 -> /tekton/run/1/status
+# |   |-- 2 -> /tekton/run/2/status
+# |   |-- step-override-workspace -> /tekton/run/2/status
+# |   |-- step-read -> /tekton/run/1/status
+# |   `-- step-write -> /tekton/run/0/status
+# `-- termination
+
+# 26 directories, 7 files
+
+# /workspace
+# `-- stuff
+
+# 1 directory, 1 file
+# $
+
+# $ kubectl logs workspace-volume-5gzq7-pod -c step-read
+
+# /
+
+# KUBERNETES_SERVICE_PORT_HTTPS=443
+# KUBERNETES_SERVICE_PORT=443
+# HOSTNAME=workspace-volume-5gzq7-pod
+# PWD=/
+# HOME=/root
+# KUBERNETES_PORT_443_TCP=tcp://10.4.0.1:443
+# SHLVL=1
+# KUBERNETES_PORT_443_TCP_PROTO=tcp
+# KUBERNETES_PORT_443_TCP_ADDR=10.4.0.1
+# KUBERNETES_SERVICE_HOST=10.4.0.1
+# KUBERNETES_PORT=tcp://10.4.0.1:443
+# KUBERNETES_PORT_443_TCP_PORT=443
+# PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+# _=/usr/bin/env
+
+# Get:1 http://archive.ubuntu.com/ubuntu noble InRelease [256 kB]
+# Get:2 http://security.ubuntu.com/ubuntu noble-security InRelease [89.7 kB]
+# Get:3 http://security.ubuntu.com/ubuntu noble-security/universe amd64 Packages [12.1 kB]
+# Get:4 http://security.ubuntu.com/ubuntu noble-security/main amd64 Packages [31.6 kB]
+# Get:5 http://archive.ubuntu.com/ubuntu noble-updates InRelease [89.7 kB]
+# Get:6 http://archive.ubuntu.com/ubuntu noble-backports InRelease [89.7 kB]
+# Get:7 http://archive.ubuntu.com/ubuntu noble/multiverse amd64 Packages [331 kB]
+# Get:8 http://archive.ubuntu.com/ubuntu noble/main amd64 Packages [1808 kB]
+# Get:9 http://archive.ubuntu.com/ubuntu noble/universe amd64 Packages [19.3 MB]
+# Get:10 http://archive.ubuntu.com/ubuntu noble/restricted amd64 Packages [117 kB]
+# Get:11 http://archive.ubuntu.com/ubuntu noble-updates/universe amd64 Packages [20.5 kB]
+# Get:12 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages [33.7 kB]
+# Get:13 http://archive.ubuntu.com/ubuntu noble-backports/universe amd64 Packages [4224 B]
+# Fetched 22.2 MB in 17s (1343 kB/s)
+# Reading package lists...
+# Reading package lists...
+# Building dependency tree...
+# Reading state information...
+# The following NEW packages will be installed:
+#   tree
+# 0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded.
+# Need to get 47.1 kB of archives.
+# After this operation, 111 kB of additional disk space will be used.
+# Get:1 http://archive.ubuntu.com/ubuntu noble/universe amd64 tree amd64 2.1.1-2ubuntu3 [47.1 kB]
+# debconf: delaying package configuration, since apt-utils is not installed
+# Fetched 47.1 kB in 1s (48.5 kB/s)
+# Selecting previously unselected package tree.
+# (Reading database ... 4368 files and directories currently installed.)
+# Preparing to unpack .../tree_2.1.1-2ubuntu3_amd64.deb ...
+# Unpacking tree (2.1.1-2ubuntu3) ...
+# Setting up tree (2.1.1-2ubuntu3) ...
+
+# /tekton
+# |-- bin
+# |   `-- entrypoint
+# |-- creds
+# |-- home
+# |-- results
+# |-- run
+# |   |-- 0
+# |   |   |-- out
+# |   |   `-- status
+# |   |       |-- exitCode
+# |   |       `-- results
+# |   |-- 1
+# |   |   `-- status
+# |   |       `-- results
+# |   `-- 2
+# |       `-- status
+# |           `-- results
+# |-- scripts
+# |   |-- script-0-q9gkj
+# |   |-- script-1-s8d72
+# |   `-- script-2-cgv8h
+# |-- steps
+# |   |-- 0 -> /tekton/run/0/status
+# |   |-- 1 -> /tekton/run/1/status
+# |   |-- 2 -> /tekton/run/2/status
+# |   |-- step-override-workspace -> /tekton/run/2/status
+# |   |-- step-read -> /tekton/run/1/status
+# |   `-- step-write -> /tekton/run/0/status
+# `-- termination
+
+# 23 directories, 7 files
+
+# /workspace
+# `-- stuff
+
+# 1 directory, 1 file
+# some stuff
+# $
+
+# $ kubectl logs workspace-volume-5gzq7-pod -c step-override-workspace
+# /
+# KUBERNETES_SERVICE_PORT_HTTPS=443
+# KUBERNETES_SERVICE_PORT=443
+# HOSTNAME=workspace-volume-5gzq7-pod
+# PWD=/
+# HOME=/root
+# KUBERNETES_PORT_443_TCP=tcp://10.4.0.1:443
+# SHLVL=1
+# KUBERNETES_PORT_443_TCP_PROTO=tcp
+# KUBERNETES_PORT_443_TCP_ADDR=10.4.0.1
+# KUBERNETES_SERVICE_HOST=10.4.0.1
+# KUBERNETES_PORT=tcp://10.4.0.1:443
+# KUBERNETES_PORT_443_TCP_PORT=443
+# PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+# _=/usr/bin/env
+# Get:1 http://security.ubuntu.com/ubuntu noble-security InRelease [89.7 kB]
+# Get:2 http://archive.ubuntu.com/ubuntu noble InRelease [256 kB]
+# Get:3 http://security.ubuntu.com/ubuntu noble-security/main amd64 Packages [31.6 kB]
+# Get:4 http://security.ubuntu.com/ubuntu noble-security/universe amd64 Packages [12.1 kB]
+# Get:5 http://archive.ubuntu.com/ubuntu noble-updates InRelease [89.7 kB]
+# Get:6 http://archive.ubuntu.com/ubuntu noble-backports InRelease [89.7 kB]
+# Get:7 http://archive.ubuntu.com/ubuntu noble/multiverse amd64 Packages [331 kB]
+# Get:8 http://archive.ubuntu.com/ubuntu noble/restricted amd64 Packages [117 kB]
+# Get:9 http://archive.ubuntu.com/ubuntu noble/main amd64 Packages [1808 kB]
+# Get:10 http://archive.ubuntu.com/ubuntu noble/universe amd64 Packages [19.3 MB]
+# Get:11 http://archive.ubuntu.com/ubuntu noble-updates/universe amd64 Packages [20.5 kB]
+# Get:12 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages [33.7 kB]
+# Get:13 http://archive.ubuntu.com/ubuntu noble-backports/universe amd64 Packages [4224 B]
+# Fetched 22.2 MB in 15s (1528 kB/s)
+# Reading package lists...
+# Reading package lists...
+# Building dependency tree...
+# Reading state information...
+# The following NEW packages will be installed:
+#   tree
+# 0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded.
+# Need to get 47.1 kB of archives.
+# After this operation, 111 kB of additional disk space will be used.
+# Get:1 http://archive.ubuntu.com/ubuntu noble/universe amd64 tree amd64 2.1.1-2ubuntu3 [47.1 kB]
+# debconf: delaying package configuration, since apt-utils is not installed
+# Fetched 47.1 kB in 4s (12.8 kB/s)
+# Selecting previously unselected package tree.
+# (Reading database ... 4368 files and directories currently installed.)
+# Preparing to unpack .../tree_2.1.1-2ubuntu3_amd64.deb ...
+# Unpacking tree (2.1.1-2ubuntu3) ...
+# Setting up tree (2.1.1-2ubuntu3) ...
+# /tekton
+# |-- bin
+# |   `-- entrypoint
+# |-- creds
+# |-- home
+# |-- results
+# |-- run
+# |   |-- 0
+# |   |   |-- out
+# |   |   `-- status
+# |   |       |-- exitCode
+# |   |       `-- results
+# |   |-- 1
+# |   |   |-- out
+# |   |   `-- status
+# |   |       |-- exitCode
+# |   |       `-- results
+# |   `-- 2
+# |       `-- status
+# |           `-- results
+# |-- scripts
+# |   |-- script-0-q9gkj
+# |   |-- script-1-s8d72
+# |   `-- script-2-cgv8h
+# |-- steps
+# |   |-- 0 -> /tekton/run/0/status
+# |   |-- 1 -> /tekton/run/1/status
+# |   |-- 2 -> /tekton/run/2/status
+# |   |-- step-override-workspace -> /tekton/run/2/status
+# |   |-- step-read -> /tekton/run/1/status
+# |   `-- step-write -> /tekton/run/0/status
+# `-- termination
+
+# 23 directories, 9 files
+# /workspace
+
+# 0 directories, 0 files
+# $

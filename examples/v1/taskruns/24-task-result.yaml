@@ -291,6 +291,7 @@ spec:
 #                   path: namespace
 
 # $ kubectl logs print-date-4h9cg-pod -c step-print-date-unix-timestamp
+
 # + apt-get update
 # Get:1 http://security.ubuntu.com/ubuntu noble-security InRelease [89.7 kB]
 # Get:2 http://archive.ubuntu.com/ubuntu noble InRelease [256 kB]
@@ -307,6 +308,7 @@ spec:
 # Get:13 http://archive.ubuntu.com/ubuntu noble-backports/universe amd64 Packages [4224 B]
 # Fetched 22.2 MB in 38s (589 kB/s)
 # Reading package lists...
+
 # + apt-get install -y tree
 # Reading package lists...
 # Building dependency tree...
@@ -324,6 +326,7 @@ spec:
 # Preparing to unpack .../tree_2.1.1-2ubuntu3_amd64.deb ...
 # Unpacking tree (2.1.1-2ubuntu3) ...
 # Setting up tree (2.1.1-2ubuntu3) ...
+
 # + tree -a /tekton
 # /tekton
 # |-- bin
@@ -354,14 +357,17 @@ spec:
 # `-- termination
 
 # 21 directories, 6 files
+
 # + tree -a /workspace
 # /workspace
 
 # 0 directories, 0 files
+
 # + date +%s
-# + tee /tekton/results/current-date-unix-timestamp
-# + tree -a /tekton
 # 1715595167
+# + tee /tekton/results/current-date-unix-timestamp
+
+# + tree -a /tekton
 # /tekton
 # |-- bin
 # |   `-- entrypoint
@@ -392,6 +398,7 @@ spec:
 # `-- termination
 
 # 21 directories, 7 files
+
 # + tree -a /workspace
 # /workspace
 
@@ -399,6 +406,7 @@ spec:
 # $
 
 # $ kubectl logs print-date-4h9cg-pod -c step-print-date-human-readable
+
 # + apt-get update
 # Get:1 http://archive.ubuntu.com/ubuntu noble InRelease [256 kB]
 # Get:2 http://security.ubuntu.com/ubuntu noble-security InRelease [89.7 kB]
@@ -415,6 +423,7 @@ spec:
 # Get:13 http://archive.ubuntu.com/ubuntu noble-backports/universe amd64 Packages [4224 B]
 # Fetched 22.2 MB in 29s (766 kB/s)
 # Reading package lists...
+
 # + apt-get install -y tree
 # Reading package lists...
 # Building dependency tree...
@@ -432,6 +441,7 @@ spec:
 # Preparing to unpack .../tree_2.1.1-2ubuntu3_amd64.deb ...
 # Unpacking tree (2.1.1-2ubuntu3) ...
 # Setting up tree (2.1.1-2ubuntu3) ...
+
 # + tree -a /tekton
 # /tekton
 # |-- bin
@@ -460,14 +470,16 @@ spec:
 # `-- termination
 
 # 18 directories, 7 files
+
+# + tree -a /workspace
 # /workspace
 
 # 0 directories, 0 files
-# + tree -a /workspace
+
 # + date
 # + tee /tekton/results/current-date-human-readable
+
 # + tree -a /tekton
-# + tree -a /workspace
 # Mon May 13 10:13:21 UTC 2024
 # /tekton
 # |-- bin
@@ -497,7 +509,183 @@ spec:
 # `-- termination
 
 # 18 directories, 8 files
+
+# + tree -a /workspace
 # /workspace
 
 # 0 directories, 0 files
 # $
+
+# ---
+# apiVersion: tekton.dev/v1
+# kind: TaskRun
+# metadata:
+#   annotations:
+#     chains.tekton.dev/signed: "true"
+#     pipeline.tekton.dev/release: d714545
+#   creationTimestamp: "2024-05-14T06:30:50Z"
+#   finalizers:
+#   - chains.tekton.dev
+#   generateName: print-date-
+#   generation: 1
+#   labels:
+#     app.kubernetes.io/managed-by: tekton-pipelines
+#   name: print-date-5ldkz
+#   namespace: default
+#   resourceVersion: "1273353"
+#   uid: 31f2ddbb-3d20-4130-a461-7bce51ae373f
+# spec:
+#   serviceAccountName: default
+#   taskSpec:
+#     description: |
+#       A simple task that prints the date.
+#     results:
+#     - description: The current date in unix timestamp format
+#       name: current-date-unix-timestamp
+#       type: string
+#     - description: The current date in human readable format
+#       name: current-date-human-readable
+#       type: string
+#     steps:
+#     - computeResources: {}
+#       image: ubuntu
+#       name: print-date-unix-timestamp
+#       script: |
+#         #!/usr/bin/env bash
+#         set -x
+
+#         apt-get update
+#         apt-get install -y tree
+#         tree -a /tekton
+#         tree -a /workspace
+
+#         date +%s | tee $(results.current-date-unix-timestamp.path)
+
+#         tree -a /tekton
+#         tree -a /workspace
+#     - computeResources: {}
+#       image: ubuntu
+#       name: print-date-human-readable
+#       script: |
+#         #!/usr/bin/env bash
+#         set -x
+
+#         apt-get update
+#         apt-get install -y tree
+#         tree -a /tekton
+#         tree -a /workspace
+
+#         date | tee $(results.current-date-human-readable.path)
+
+#         tree -a /tekton
+#         tree -a /workspace
+#   timeout: 1h0m0s
+# status:
+#   completionTime: "2024-05-14T06:31:32Z"
+#   conditions:
+#   - lastTransitionTime: "2024-05-14T06:31:32Z"
+#     message: All Steps have completed executing
+#     reason: Succeeded
+#     status: "True"
+#     type: Succeeded
+#   podName: print-date-5ldkz-pod
+#   provenance:
+#     featureFlags:
+#       AwaitSidecarReadiness: true
+#       Coschedule: workspaces
+#       DisableAffinityAssistant: false
+#       DisableCredsInit: false
+#       EnableAPIFields: beta
+#       EnableCELInWhenExpression: false
+#       EnableKeepPodOnCancel: false
+#       EnableParamEnum: false
+#       EnableProvenanceInStatus: true
+#       EnableStepActions: false
+#       EnableTektonOCIBundles: false
+#       EnforceNonfalsifiability: none
+#       MaxResultSize: 4096
+#       RequireGitSSHSecretKnownHosts: false
+#       ResultExtractionMethod: termination-message
+#       RunningInEnvWithInjectedSidecars: true
+#       ScopeWhenExpressionsToTask: false
+#       SendCloudEventsForRuns: false
+#       SetSecurityContext: false
+#       VerificationNoMatchPolicy: ignore
+#   results:
+#   - name: current-date-unix-timestamp
+#     type: string
+#     value: |
+#       1715668273
+#   - name: current-date-human-readable
+#     type: string
+#     value: |
+#       Tue May 14 06:31:31 UTC 2024
+#   startTime: "2024-05-14T06:30:50Z"
+#   steps:
+#   - container: step-print-date-unix-timestamp
+#     imageID: docker.io/library/ubuntu@sha256:3f85b7caad41a95462cf5b787d8a04604c8262cdcdf9a472b8c52ef83375fe15
+#     name: print-date-unix-timestamp
+#     terminated:
+#       containerID: containerd://ff6eafb5c2d7f3b66c928fc195537eebb12fc80d2bd5709c3c416f0d441a9412
+#       exitCode: 0
+#       finishedAt: "2024-05-14T06:31:13Z"
+#       message: '[{"key":"current-date-unix-timestamp","value":"1715668273\n","type":1}]'
+#       reason: Completed
+#       startedAt: "2024-05-14T06:31:00Z"
+#     terminationReason: Completed
+#   - container: step-print-date-human-readable
+#     imageID: docker.io/library/ubuntu@sha256:3f85b7caad41a95462cf5b787d8a04604c8262cdcdf9a472b8c52ef83375fe15
+#     name: print-date-human-readable
+#     terminated:
+#       containerID: containerd://94d79db3dc2b753e3dab1b9a9a2d41cfdffac515ced17fed038a9bc01703e71c
+#       exitCode: 0
+#       finishedAt: "2024-05-14T06:31:31Z"
+#       message: '[{"key":"current-date-human-readable","value":"Tue May 14 06:31:31
+#         UTC 2024\n","type":1},{"key":"current-date-unix-timestamp","value":"1715668273\n","type":1}]'
+#       reason: Completed
+#       startedAt: "2024-05-14T06:31:13Z"
+#     terminationReason: Completed
+#   taskSpec:
+#     description: |
+#       A simple task that prints the date.
+#     results:
+#     - description: The current date in unix timestamp format
+#       name: current-date-unix-timestamp
+#       type: string
+#     - description: The current date in human readable format
+#       name: current-date-human-readable
+#       type: string
+#     steps:
+#     - computeResources: {}
+#       image: ubuntu
+#       name: print-date-unix-timestamp
+#       script: |
+#         #!/usr/bin/env bash
+#         set -x
+
+#         apt-get update
+#         apt-get install -y tree
+#         tree -a /tekton
+#         tree -a /workspace
+
+#         date +%s | tee /tekton/results/current-date-unix-timestamp
+
+#         tree -a /tekton
+#         tree -a /workspace
+#     - computeResources: {}
+#       image: ubuntu
+#       name: print-date-human-readable
+#       script: |
+#         #!/usr/bin/env bash
+#         set -x
+
+#         apt-get update
+#         apt-get install -y tree
+#         tree -a /tekton
+#         tree -a /workspace
+
+#         date | tee /tekton/results/current-date-human-readable
+
+#         tree -a /tekton
+#         tree -a /workspace
+# ---

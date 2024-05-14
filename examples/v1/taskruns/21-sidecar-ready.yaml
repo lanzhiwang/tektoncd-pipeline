@@ -11,6 +11,9 @@ spec:
         # The sidecar takes 5s to report as Ready, even after it starts.  If the
         # step runs as soon as the sidecar starts, it will fail because
         # /shared/ready isn't available yet.
+        # 即使在启动后，sidecar 也需要 5 秒才能报告为就绪。 如果
+        # sidecar 启动后，step 就会立即运行，它会失败，因为
+        # /shared/ready 尚不可用。
         readinessProbe:
           exec:
             command:
@@ -37,3 +40,132 @@ spec:
     volumes:
       - name: shared
         emptyDir: {}
+# ---
+# apiVersion: tekton.dev/v1
+# kind: TaskRun
+# metadata:
+#   annotations:
+#     chains.tekton.dev/signed: "true"
+#     pipeline.tekton.dev/release: d714545
+#   creationTimestamp: "2024-05-14T06:43:04Z"
+#   finalizers:
+#     - chains.tekton.dev
+#   generateName: sidecar-ready-
+#   generation: 1
+#   labels:
+#     app.kubernetes.io/managed-by: tekton-pipelines
+#   name: sidecar-ready-sp5bl
+#   namespace: default
+#   resourceVersion: "1293409"
+#   uid: ddcf2c97-beb8-4237-b9da-0fbee7006c1a
+# spec:
+#   serviceAccountName: default
+#   taskSpec:
+#     sidecars:
+#       - command:
+#           - sleep
+#           - infinity
+#         computeResources: {}
+#         image: ubuntu
+#         name: slow-sidecar
+#         readinessProbe:
+#           exec:
+#             command:
+#               - sh
+#               - -c
+#               - sleep 5 && touch /shared/ready
+#           timeoutSeconds: 10
+#         volumeMounts:
+#           - mountPath: /shared
+#             name: shared
+#     steps:
+#       - computeResources: {}
+#         image: ubuntu
+#         name: check-ready
+#         script: cat /shared/ready
+#         volumeMounts:
+#           - mountPath: /shared
+#             name: shared
+#     volumes:
+#       - emptyDir: {}
+#         name: shared
+#   timeout: 1h0m0s
+# status:
+#   completionTime: "2024-05-14T06:43:22Z"
+#   conditions:
+#     - lastTransitionTime: "2024-05-14T06:43:22Z"
+#       message: All Steps have completed executing
+#       reason: Succeeded
+#       status: "True"
+#       type: Succeeded
+#   podName: sidecar-ready-sp5bl-pod
+#   provenance:
+#     featureFlags:
+#       AwaitSidecarReadiness: true
+#       Coschedule: workspaces
+#       DisableAffinityAssistant: false
+#       DisableCredsInit: false
+#       EnableAPIFields: beta
+#       EnableCELInWhenExpression: false
+#       EnableKeepPodOnCancel: false
+#       EnableParamEnum: false
+#       EnableProvenanceInStatus: true
+#       EnableStepActions: false
+#       EnableTektonOCIBundles: false
+#       EnforceNonfalsifiability: none
+#       MaxResultSize: 4096
+#       RequireGitSSHSecretKnownHosts: false
+#       ResultExtractionMethod: termination-message
+#       RunningInEnvWithInjectedSidecars: true
+#       ScopeWhenExpressionsToTask: false
+#       SendCloudEventsForRuns: false
+#       SetSecurityContext: false
+#       VerificationNoMatchPolicy: ignore
+#   sidecars:
+#     - container: sidecar-slow-sidecar
+#       imageID: docker.io/library/ubuntu@sha256:3f85b7caad41a95462cf5b787d8a04604c8262cdcdf9a472b8c52ef83375fe15
+#       name: slow-sidecar
+#       running:
+#         startedAt: "2024-05-14T06:43:14Z"
+#   startTime: "2024-05-14T06:43:04Z"
+#   steps:
+#     - container: step-check-ready
+#       imageID: docker.io/library/ubuntu@sha256:3f85b7caad41a95462cf5b787d8a04604c8262cdcdf9a472b8c52ef83375fe15
+#       name: check-ready
+#       terminated:
+#         containerID: containerd://bdf640699acb39be1658dd830614ad52af5e92928fb5a654791f3fb069049266
+#         exitCode: 0
+#         finishedAt: "2024-05-14T06:43:21Z"
+#         reason: Completed
+#         startedAt: "2024-05-14T06:43:21Z"
+#       terminationReason: Completed
+#   taskSpec:
+#     sidecars:
+#       - command:
+#           - sleep
+#           - infinity
+#         computeResources: {}
+#         image: ubuntu
+#         name: slow-sidecar
+#         readinessProbe:
+#           exec:
+#             command:
+#               - sh
+#               - -c
+#               - sleep 5 && touch /shared/ready
+#           timeoutSeconds: 10
+#         volumeMounts:
+#           - mountPath: /shared
+#             name: shared
+#     steps:
+#       - computeResources: {}
+#         image: ubuntu
+#         name: check-ready
+#         script: cat /shared/ready
+#         volumeMounts:
+#           - mountPath: /shared
+#             name: shared
+#     volumes:
+#       - emptyDir: {}
+#         name: shared
+

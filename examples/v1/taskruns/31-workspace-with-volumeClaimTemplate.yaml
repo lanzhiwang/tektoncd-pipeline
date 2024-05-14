@@ -113,7 +113,6 @@ spec:
 #   annotations:
 #     pipeline.tekton.dev/release: d714545
 #     tekton.dev/ready: READY
-#   creationTimestamp: "2024-04-30T09:51:38Z"
 #   labels:
 #     app.kubernetes.io/managed-by: tekton-pipelines
 #     tekton.dev/taskRun: task-with-workspace-run-pqjfb
@@ -126,8 +125,6 @@ spec:
 #       kind: TaskRun
 #       name: task-with-workspace-run-pqjfb
 #       uid: af91f880-a3c9-41c8-8246-5aba3a68fb01
-#   resourceVersion: "623054"
-#   uid: 440eb4fc-cf9e-443c-92af-2f78f577ebde
 # spec:
 #   activeDeadlineSeconds: 5400
 #   containers:
